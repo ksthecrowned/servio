@@ -52,32 +52,32 @@ export default async function OrderTrackingPage(
               {item.item_name}
               {item.variant_name ? ` (${item.variant_name})` : ""} × {item.quantity}
             </span>
-            <span>₹{item.unit_price * item.quantity}</span>
+            <span>{formatCurrency(item.unit_price * item.quantity)}</span>
           </div>
         ))}
 
         <div className="mt-2 flex flex-col gap-1 border-t pt-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>₹{order.subtotal}</span>
+            <span>{formatCurrency(order.subtotal)}</span>
           </div>
           {order.discount_amount > 0 && (
             <div className="flex justify-between text-brand">
               <span>Discount</span>
-              <span>−₹{order.discount_amount}</span>
+              <span>−{formatCurrency(order.discount_amount)}</span>
             </div>
           )}
           <div className="flex justify-between">
             <span>Tax</span>
-            <span>₹{order.tax_amount}</span>
+            <span>{formatCurrency(order.tax_amount)}</span>
           </div>
           <div className="flex justify-between">
             <span>Service charge</span>
-            <span>₹{order.service_charge_amount}</span>
+            <span>{formatCurrency(order.service_charge_amount)}</span>
           </div>
           <div className="flex justify-between font-medium">
             <span>Total</span>
-            <span>₹{order.total_amount}</span>
+            <span>{formatCurrency(order.total_amount)}</span>
           </div>
         </div>
       </div>
