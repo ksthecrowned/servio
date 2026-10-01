@@ -52,7 +52,7 @@ create type offer_type as enum (
 
 create type payment_method as enum (
   'cash',
-  'upi',
+  'mobile_money',
   'card',
   'online'
 );
