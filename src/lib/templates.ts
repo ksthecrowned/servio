@@ -72,7 +72,7 @@ export const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
     image: "rounded-2xl",
   },
 
-  indian: {
+  local: {
     page: "",
     card: "rounded-lg border-l-4 border-l-[color:var(--brand)]",
     heading: "text-lg font-bold uppercase tracking-wider",
