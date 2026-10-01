@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 "use client";
 
 import { useActionState, useState } from "react";
@@ -63,7 +64,7 @@ export function AddItemForm({
         <Input id="itemName" name="name" placeholder="Cappuccino" required className="w-48" />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="basePrice">Price (₹)</Label>
+        <Label htmlFor="basePrice">Price (XAF)</Label>
         <Input
           id="basePrice"
           name="basePrice"
