@@ -3,10 +3,11 @@
 Product: Servio
 Category: Restaurant & Cafe Management SaaS
 Platform: Web App + PWA
-Primary Market: India
+Primary Market: Republic of the Congo (Congo-Brazzaville)
+Secondary Market: CEMAC / Central Africa
 Core Technology: Next.js + Supabase + PostgreSQL
 Business Model: Subscription SaaS
-Version: 1.0 MVP
+Version: 1.1 — Congo-first product specification
 
 ---
 
@@ -52,7 +53,7 @@ Servio should not be positioned as merely a QR Menu Generator.
 
 Traditional restaurants face:
 
-- Physical menu management
+- Paper menu management
 - Menu price updates
 - Slow ordering
 - Waiter dependency
@@ -62,7 +63,7 @@ Traditional restaurants face:
 - No real-time order visibility
 - Poor restaurant analytics
 - Difficult staff management
-- Multiple branch management
+- Multi-branch management
 - Expensive POS systems
 
 Servio combines these workflows into one SaaS.
@@ -141,7 +142,7 @@ Servio
 
 **Authentication**: Supabase Auth
 
-**Realtime**: Supabase Realtime
+**Realtime**: Supabase Realtime where appropriate; secure server-side polling is acceptable where browser-side Realtime would conflict with the authentication/RLS model.
 
 **Storage**: Supabase Storage — for restaurant logos, food images, cover images, staff avatars
 
@@ -149,7 +150,7 @@ Servio
 
 **QR**: QR generation library
 
-**Payments**: India-focused payment gateway such as Razorpay, to be integrated after MVP if needed.
+**Payments**: MTN MoMo and Airtel Money as the primary local digital rails, behind a provider-agnostic payment abstraction. Direct operator APIs or a compliant payment aggregator may be integrated when commercial access is available. Cash and manual payment confirmation remain supported.
 
 ---
 
@@ -178,7 +179,7 @@ PWA Session
 Example:
 
 ```
-THE COFFEE HOUSE
+RESTAURANT EXAMPLE
 
 Select Role
 
@@ -251,12 +252,12 @@ Owner can configure: restaurant name, logo, cover image, description, phone, add
 Each restaurant can have one or multiple branches depending on subscription.
 
 ```
-The Coffee House
+Restaurant Example
 │
-├── Jaipur
-├── Jodhpur
-├── Delhi
-└── Chandigarh
+├── Brazzaville
+├── Pointe-Noire
+├── Dolisie
+└── Oyo
 ```
 
 Each branch has: tables, staff, menu settings, orders, analytics.
@@ -278,13 +279,13 @@ Every table receives a permanent QR code.
 Example:
 
 ```
-Restaurant: The Coffee House
-Branch: Jodhpur
+Restaurant: Restaurant Example
+Branch: Pointe-Noire
 Table: 04
 
 QR
  ↓
-/menu/the-coffee-house/jodhpur/table/04
+/menu/[restaurant]/[branch]/[table]
 ```
 
 Changing menu, price, offers, or template must not require a new QR code.
@@ -336,12 +337,12 @@ Cart supports quantity, variants, add-ons, special instructions, offers, coupons
 Example:
 
 ```
-Subtotal          ₹650
-Discount         -₹100
-Tax                ₹27
-Service charge     ₹20
+Subtotal          6,500 XAF
+Discount         -1,000 XAF
+Tax                270 XAF
+Service charge     200 XAF
 ──────────────────────
-Total             ₹597
+Total             5,970 XAF
 ```
 
 ---
@@ -441,7 +442,7 @@ Owner can configure logo, colors, fonts, cover image, description, buttons, menu
 
 **Free**: Minimal, Classic, Modern.
 
-**Premium**: Luxury, Premium Dark, Cafe, Indian, Fast Food, Coffee, Fine Dining, Editorial.
+**Premium**: Luxury, Premium Dark, Cafe, Local / Congo, Fast Food, Coffee, Fine Dining, Editorial.
 
 Template changes must not change menu data.
 
@@ -471,9 +472,13 @@ Status updates in real time.
 
 ## 35. Bill & Payment
 
-**MVP**: Cash, UPI, Card, manual payment status.
+**MVP**: Cash, MTN MoMo, Airtel Money, Card where available, manual payment status.
 
-**Future**: Online payment, payment gateway, digital receipt, GST invoice, printer integration.
+The payment layer must remain provider-agnostic. A restaurant may configure one or more supported payment methods. Mobile Money integrations should use server-side payment intents, transaction references, idempotency and webhook/status reconciliation when the selected provider supports them.
+
+For the first Congo release, Servio must remain usable without an API integration by allowing the cashier to record a manually confirmed payment.
+
+**Future**: Automated Mobile Money collection, merchant QR, digital receipt, local invoice, refund/reconciliation workflows, printer integration.
 
 ---
 
@@ -527,7 +532,7 @@ Customer segments: New, Returning, Frequent, High Value.
 
 ## 42. Loyalty — Future
 
-₹100 spent → 10 points. Points redeemable for discounts, free products, coupons.
+6,500 XAF spent → 10 points. Points redeemable for discounts, free products, coupons.
 
 ---
 
@@ -545,7 +550,7 @@ Basic inventory (Milk, Coffee, Cheese, Bread). When unavailable, item shows "Sol
 
 ## 45. Multi-Branch — Pro
 
-Centralized reporting across branches (Jodhpur, Jaipur, Delhi, …).
+Centralized reporting across branches (Pointe-Noire, Brazzaville, Dolisie, …).
 
 ---
 
@@ -574,7 +579,7 @@ Modules: Restaurants, Users, Plans, Subscriptions, Payments, Templates, Support,
 | Multiple Branches | — | — | ✓ |
 | White Label | — | — | ✓ |
 
-Initial pricing to test: Starter ₹499/month, Business ₹999/month, Pro ₹1,999/month.
+Initial pricing hypothesis to test: Starter 5,000 XAF/month, Business 10,000 XAF/month, Pro 20,000 XAF/month. Final pricing and feature limits should be validated with Congo restaurant pilots.
 
 ---
 
@@ -703,7 +708,7 @@ Must implement: Supabase Auth, role-based access, restaurant-level data isolatio
 
 ## 54. MVP Must NOT Include
 
-Full inventory, loyalty, CRM automation, advanced marketing, POS hardware, GST accounting suite, staff attendance, custom hardware, complex multi-branch analytics. These belong in later versions.
+Full inventory, loyalty, CRM automation, advanced marketing, POS hardware, Country-specific accounting suite, staff attendance, custom hardware, complex multi-branch analytics. These belong in later versions.
 
 ---
 
@@ -715,7 +720,7 @@ Inventory, Online Payments, WhatsApp, Advanced Analytics, Feedback, Multi-Branch
 
 ## 56. Version 3
 
-Loyalty, CRM, Marketing Automation, POS Integration, GST Billing, Printer Integration, Custom Domain, White Label, API, Servio Alert Box.
+Loyalty, CRM, Marketing Automation, POS Integration, Local tax/accounting integrations, Printer Integration, Custom Domain, White Label, API, Servio Alert Box.
 
 ---
 
@@ -745,18 +750,20 @@ Order → Push Notification → Sound → Staff Device / Kitchen Display → Acc
 
 ## 61. Final Business Model
 
-Servio earns through SaaS subscriptions (₹499 → ₹999 → ₹1,999/month).
+Servio earns primarily through SaaS subscriptions, with an initial Congo pricing hypothesis of 5,000 XAF → 10,000 XAF → 20,000 XAF/month, subject to validation with restaurant pilots.
 
-Future revenue: premium templates, white-label, custom domains, WhatsApp credits, payment services, hardware alert devices, multi-branch plans, enterprise plans.
+Future revenue: premium templates, white-label, custom domains, WhatsApp / messaging credits, payment integrations, hardware alert devices, multi-branch plans, enterprise plans.
 
 ---
 
 ## 62. Final Product Definition
 
-Servio is a restaurant operating system that starts with a QR code and connects the complete customer-to-kitchen workflow.
+Servio is a restaurant operating system designed first for restaurants and food businesses in Congo-Brazzaville, starting with a QR code and connecting the complete customer-to-kitchen workflow.
+
+The product should support local operating realities: XAF pricing, MTN MoMo and Airtel Money, mobile-first staff workflows, cash payments, local business information and gradual adoption of digital tools.
 
 Recommended production stack:
 
 > Next.js + TypeScript + Tailwind + shadcn/ui + Supabase PostgreSQL + Supabase Auth + Supabase Realtime + Supabase Storage + Vercel
 
-**MVP goal**: First make QR → menu → table → order → kitchen → notification → completion completely reliable. Everything else should be layered on top of that core loop.
+**MVP goal**: First make QR → menu → table → order → kitchen → notification → payment recording → completion completely reliable for Congo restaurant operations. Everything else should be layered on top of that core loop.
