@@ -1,9 +1,9 @@
-import { formatCurrency } from "@/lib/currency";
 "use client";
 
 import { useActionState, useState } from "react";
 
 import { addMenuItem } from "@/app/actions/menu";
+import { formatCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
