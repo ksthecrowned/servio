@@ -209,7 +209,7 @@ export async function transferWaiterRequest(
   return { error: error?.message ?? null };
 }
 
-export async function markBillPaid(billId: string, method: "cash" | "upi" | "card") {
+export async function markBillPaid(billId: string, method: "cash" | "mobile_money" | "card") {
   const session = await requireStaffSession("cashier");
   const admin = createAdminClient();
 
