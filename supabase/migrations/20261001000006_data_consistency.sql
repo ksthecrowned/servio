@@ -26,6 +26,10 @@ alter table table_sessions
   add constraint table_sessions_id_branch_unique
   unique (id, branch_id);
 
+alter table restaurant_tables
+  add constraint restaurant_tables_id_branch_unique
+  unique (id, branch_id);
+
 alter table table_sessions
   add constraint table_sessions_table_branch_unique
   unique (table_id, branch_id);
@@ -39,10 +43,6 @@ alter table table_sessions
   foreign key (table_id, branch_id)
   references restaurant_tables(id, branch_id)
   on delete cascade;
-
-alter table restaurant_tables
-  add constraint restaurant_tables_id_branch_unique
-  unique (id, branch_id);
 
 alter table branches
   add constraint branches_id_restaurant_unique
