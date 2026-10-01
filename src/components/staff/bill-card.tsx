@@ -14,13 +14,13 @@ type Bill = {
   id: string;
   total_amount: number;
   tableLabel: string;
-  /** Pre-rendered UPI QR, null when the restaurant hasn't set a UPI ID. */
-  upiQrDataUrl: string | null;
+  /** Pre-rendered local payment QR, null when no payment QR is configured. */
+  paymentQrDataUrl: string | null;
 };
 
 const METHODS = [
   { value: "cash", label: "Cash" },
-  { value: "upi", label: "UPI" },
+  { value: "mobile_money", label: "Mobile Money" },
   { value: "card", label: "Card" },
 ] as const;
 
@@ -55,7 +55,7 @@ export function BillCard({ bill }: { bill: Bill }) {
           </div>
 
           {method === "upi" ? (
-            bill.upiQrDataUrl ? (
+            bill.paymentQrDataUrl ? (
               <Button type="button" variant="outline" onClick={() => setShowQr(true)}>
                 <QrCode className="size-4" />
                 Show QR to customer
@@ -85,9 +85,9 @@ export function BillCard({ bill }: { bill: Bill }) {
           {bill.upiQrDataUrl ? (
             <div className="flex flex-col items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bill.upiQrDataUrl} alt="UPI payment QR" className="w-full rounded-md border" />
+              <img src={bill.upiQrDataUrl} alt="Mobile Money payment QR" className="w-full rounded-md border" />
               <p className="text-center text-xs text-muted-foreground">
-                Customer scans with any UPI app. Confirm the payment landed, then tap Mark paid.
+                Customer scans with any Mobile Money app. Confirm the payment landed, then tap Mark paid.
               </p>
             </div>
           ) : null}
