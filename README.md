@@ -16,7 +16,7 @@ product spec: [`docs/PRD.md`](docs/PRD.md).
 - 📱 **QR-first digital menu** — no app install, scan and order
 - 🧑‍🍳 **Live kitchen display** — pending → accepted → preparing → ready
 - 🔔 **Waiter call & bill requests** from the table, in real time-ish
-- 🧾 **Cashier flow** — bill creation and UPI QR payment collection
+- 🧾 **Cashier flow** — bill creation and Mobile Money payment recording
 - 🎨 **Templates & branding** — 11 menu templates, brand colour, custom fonts
 - 👥 **Role-based staff access** — waiter / kitchen / cashier PIN login
 - 🏷️ **Coupons & offers**, seeded subscription plans
@@ -62,7 +62,7 @@ applied in filename order:
 4. `..._seed_reference_data.sql` — subscription plans and menu templates
 5. `..._coupon_usage_function.sql` — atomic coupon-redemption counter used by `placeOrder`
 6. `..._storage_buckets.sql` — image buckets + storage RLS (per-restaurant folders)
-7. `..._upi_payment.sql` — UPI collection details on `restaurants`
+7. `..._mobile_money_payment.sql` — local Mobile Money payment method
 
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.
