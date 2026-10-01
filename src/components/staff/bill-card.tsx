@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 "use client";
 
 import { useState, useTransition } from "react";
@@ -34,7 +35,7 @@ export function BillCard({ bill }: { bill: Bill }) {
         <CardContent className="flex flex-col gap-4 pt-6">
           <div className="flex items-baseline justify-between">
             <p className="font-medium">Table {bill.tableLabel}</p>
-            <p className="text-xl font-semibold">₹{bill.total_amount}</p>
+            <p className="text-xl font-semibold">{formatCurrency(bill.total_amount)}</p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
@@ -79,7 +80,7 @@ export function BillCard({ bill }: { bill: Bill }) {
       <Dialog open={showQr} onOpenChange={setShowQr}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle>Table {bill.tableLabel} · ₹{bill.total_amount}</DialogTitle>
+            <DialogTitle>Table {bill.tableLabel} · {formatCurrency(bill.total_amount)}</DialogTitle>
           </DialogHeader>
           {bill.upiQrDataUrl ? (
             <div className="flex flex-col items-center gap-3">
