@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { lineTotal } from "@/lib/cart-types";
+import { formatCurrency } from "@/lib/currency";
 
 export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { lines, updateQuantity, removeLine, subtotal, clear } = useCart();
@@ -104,7 +105,7 @@ export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                   </button>
                 </div>
               </div>
-              <p className="font-medium">₹{lineTotal(line)}</p>
+              <p className="font-medium">{formatCurrency(lineTotal(line))}</p>
             </div>
           ))}
           {lines.length === 0 && <p className="text-sm text-muted-foreground">Your cart is empty.</p>}
@@ -114,7 +115,7 @@ export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
           <>
             <div className="flex items-center justify-between border-t pt-3 font-medium">
               <span>Subtotal</span>
-              <span>₹{subtotal}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             <p className="text-xs text-muted-foreground">
               Tax, service charge and any coupon discount are applied when you place the order.
