@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { createClient } from "@/lib/supabase/server";
+import { formatCurrency } from "@/lib/currency";
 
 export default async function OrdersPage() {
   const restaurant = await requireCurrentRestaurant();
@@ -37,7 +38,7 @@ export default async function OrdersPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="font-medium">₹{order.total_amount}</span>
+                <span className="font-medium">{formatCurrency(order.total_amount)}</span>
                 <Badge>{order.status}</Badge>
               </div>
             </div>
