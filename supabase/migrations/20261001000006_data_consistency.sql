@@ -30,6 +30,10 @@ alter table table_sessions
   add constraint table_sessions_table_branch_unique
   unique (table_id, branch_id);
 
+create unique index table_sessions_one_open_per_table_idx
+  on table_sessions (table_id)
+  where status = 'open';
+
 alter table table_sessions
   add constraint table_sessions_table_branch_fk
   foreign key (table_id, branch_id)
@@ -141,6 +145,10 @@ alter table order_items
 -- ---------------------------------------------------------------------------
 -- Bills / payments
 -- ---------------------------------------------------------------------------
+
+alter table bills
+  add constraint bills_id_restaurant_unique
+  unique (id, restaurant_id);
 
 alter table bills
   add constraint bills_id_restaurant_unique
