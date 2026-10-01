@@ -230,3 +230,4 @@ Deliberately not built yet (see PRD §53–56 for the phased roadmap):
 - `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS and is only ever used server-side,
   for the two cases where no Supabase Auth session exists to check against
   RLS in the first place: staff PIN login and platform-admin listing.
+# servio
