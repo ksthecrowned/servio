@@ -1,7 +1,12 @@
--- Lock down execution of private RLS helper functions.
--- These functions are referenced by RLS policies and are not client RPCs.
+-- RLS policies execute these SECURITY DEFINER helpers on behalf of
+-- anon/authenticated requests. Keep the schema outside the API-exposed
+-- schemas; grant only the privileges required for policy evaluation.
 
-revoke all on schema private from public, anon, authenticated;
-grant usage on schema private to service_role;
+grant usage on schema private to anon, authenticated;
 
-revoke execute on all functions in schema private from public, anon, authenticated;
+grant execute on function private.is_platform_admin() to anon, authenticated;
+grant execute on function private.is_restaurant_member(uuid) to anon, authenticated;
+grant execute on function private.is_restaurant_manager(uuid) to anon, authenticated;
+grant execute on function private.branch_restaurant_id(uuid) to anon, authenticated;
+grant execute on function private.table_restaurant_id(uuid) to anon, authenticated;
+grant execute on function private.owns_storage_object_restaurant(text) to anon, authenticated;
