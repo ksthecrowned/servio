@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useCart } from "@/components/menu/cart-provider";
 import { CartSheet } from "@/components/menu/cart-sheet";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/currency";
 
 export function CartBar() {
   const { itemCount, subtotal } = useCart();
@@ -22,7 +23,7 @@ export function CartBar() {
           <span>
             {itemCount} item{itemCount > 1 ? "s" : ""}
           </span>
-          <span>View cart · ₹{subtotal}</span>
+          <span>View cart · {formatCurrency(subtotal)}</span>
         </Button>
       </div>
       <CartSheet open={open} onOpenChange={setOpen} />
