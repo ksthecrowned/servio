@@ -16,8 +16,6 @@ type Restaurant = {
   service_charge_percent: number;
   logo_url: string | null;
   cover_image_url: string | null;
-  upi_id: string | null;
-  upi_display_name: string | null;
 };
 
 export function RestaurantSettingsForm({
@@ -100,39 +98,6 @@ export function RestaurantSettingsForm({
             defaultValue={restaurant.service_charge_percent}
             className="w-28"
           />
-        </div>
-      </div>
-      <div className="flex flex-col gap-3 border-t pt-4">
-        <div>
-          <Label className="text-base">UPI payments</Label>
-          <p className="text-sm text-muted-foreground">
-            Add your UPI ID and the cashier can show customers a payment QR. Money goes straight
-            to your account — no gateway, no commission.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="upiId">UPI ID</Label>
-            <Input
-              id="upiId"
-              name="upiId"
-              defaultValue={restaurant.upi_id ?? ""}
-              placeholder="thecoffeehouse@okhdfcbank"
-              autoCapitalize="none"
-              spellCheck={false}
-              className="w-64"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="upiDisplayName">Payee name (optional)</Label>
-            <Input
-              id="upiDisplayName"
-              name="upiDisplayName"
-              defaultValue={restaurant.upi_display_name ?? ""}
-              placeholder="Defaults to restaurant name"
-              className="w-64"
-            />
-          </div>
         </div>
       </div>
 
