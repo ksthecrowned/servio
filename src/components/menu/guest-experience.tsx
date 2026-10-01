@@ -30,6 +30,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { listTableRequests, requestWaiterAssistance, type TableRequest } from "@/app/actions/waiter-requests";
 import { requestDetail, requestPhase, requestTitle } from "@/lib/request-status";
 import type { MenuItemForCart } from "@/components/menu/add-to-cart-dialog";
+import { formatCurrency } from "@/lib/currency";
 
 type View = "home" | "menu" | "detail" | "call" | "water" | "bill" | "other" | "question" | "requests";
 type Dish = MenuItemForCart & { categoryName: string };
