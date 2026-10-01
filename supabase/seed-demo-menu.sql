@@ -72,7 +72,7 @@ begin
 
   delete from coupons where restaurant_id = v_restaurant_id and code in ('WEEKEND20','FIRST50');
   delete from offers  where restaurant_id = v_restaurant_id
-    and name in ('Weekend 20% Off','Flat ₹50 Off','Happy Hours');
+    and name in ('Weekend 20% Off','Flat 5,000 XAF Off','Happy Hours');
 
   ---------------------------------------------------------------------------
   -- Categories
@@ -131,7 +131,7 @@ begin
   insert into menu_items (restaurant_id, category_id, name, description, base_price,
                           is_veg, is_recommended, sort_order)
   values (v_restaurant_id, c_coffee, 'Filter Coffee',
-          'South Indian filter kaapi, served in a traditional tumbler.', 99, true, true, 4);
+          'Café filtre, servi à la congolaise.', 99, true, true, 4);
 
   insert into menu_items (restaurant_id, category_id, name, description, base_price, is_veg, sort_order)
   values (v_restaurant_id, c_coffee, 'Masala Chai',
@@ -364,7 +364,7 @@ begin
   values (v_restaurant_id, v_offer, 'WEEKEND20', 100, true);
 
   insert into offers (restaurant_id, name, type, flat_value, min_order_value, is_active)
-  values (v_restaurant_id, 'Flat ₹50 Off', 'flat', 50, 300, true)
+  values (v_restaurant_id, 'Flat 5,000 XAF Off', 'flat', 50, 300, true)
   returning id into v_offer;
 
   insert into coupons (restaurant_id, offer_id, code, usage_limit, is_active)
