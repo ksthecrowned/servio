@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
@@ -35,7 +36,7 @@ export default async function AdminPaymentsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-medium">₹{tx.amount}</span>
+                <span className="font-medium">{formatCurrency(tx.amount)}</span>
                 <Badge variant={tx.status === "paid" ? "brand" : "outline"}>{tx.status}</Badge>
               </div>
             </div>
