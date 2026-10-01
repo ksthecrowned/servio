@@ -174,13 +174,7 @@ preparing → ready, the waiter's "Ready to serve" queue takes ready → served,
 and the cashier recording payment completes every open order on the table
 session and frees the table. Each transition writes to `order_status_history`.
 
-**Payment** (PRD §35's MVP scope — cash/UPI/card, manually confirmed): setting
-a UPI ID in Settings lets the cashier show a `upi://pay` QR with the bill
-amount pre-filled. The customer's UPI app pays the restaurant directly, so
-there is no gateway, no merchant onboarding and no per-transaction fee; the
-cashier still confirms receipt by hand, exactly like cash. The URI is
-percent-encoded rather than built with `URLSearchParams`, whose `+` for spaces
-some UPI apps render literally in the payee name.
+**Payment** (Congo-first): cash, Mobile Money and card, with manual confirmation in the current release. Automated Mobile Money collection is intentionally provider-agnostic and can be added when a supported local provider/aggregator is connected.
 
 **Near-real-time, not websocket Realtime**: customers and PIN-authenticated
 staff never hold a Supabase Auth session, so a browser-side Supabase Realtime
@@ -201,9 +195,9 @@ Deliberately not built yet (see PRD §53–56 for the phased roadmap):
   no create/edit form for the owner)
 - Customer feedback form (schema exists; no UI)
 - Editing/deleting existing menu items (create works; no edit form yet)
-- Online payment gateway (UPI QR covers in-person payment; there's no
+- Online payment gateway (automated Mobile Money collection is not yet connected; there's no
   automatic reconciliation — the cashier confirms receipt manually)
-- GST invoicing, printer integration
+- local invoicing, printer integration
 - Inventory, loyalty, CRM, WhatsApp — explicitly out of MVP scope per PRD §54
 
 ## Deployment notes
