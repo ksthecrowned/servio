@@ -45,7 +45,7 @@ const TYPE_TITLE: Record<string, string> = {
 };
 
 function formatPrice(price: number) {
-  return `₹${new Intl.NumberFormat("en-IN").format(price)}`;
+  return formatCurrency(price);
 }
 
 function mark(name: string) {
