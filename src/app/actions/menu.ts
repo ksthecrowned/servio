@@ -37,8 +37,10 @@ export async function addMenuItem(
 ): Promise<MenuActionState> {
   const categoryId = String(formData.get("categoryId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
   const basePrice = Number(formData.get("basePrice"));
   const isVeg = formData.get("isVeg") === "on";
+  const isBestseller = formData.get("isBestseller") === "on";
   const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
 
   if (!categoryId || !name || Number.isNaN(basePrice)) {
@@ -52,8 +54,10 @@ export async function addMenuItem(
     restaurant_id: restaurant.restaurantId,
     category_id: categoryId,
     name,
+    description,
     base_price: basePrice,
     is_veg: isVeg,
+    is_bestseller: isBestseller,
     image_url: imageUrl,
   });
 
@@ -63,9 +67,55 @@ export async function addMenuItem(
   return { error: null, savedAt: Date.now() };
 }
 
-export async function toggleMenuItemAvailability(itemId: string, isAvailable: boolean) {
-  await requireCurrentRestaurant();
+export async function updateMenuItem(
+  _prevState: MenuActionState,
+  formData: FormData,
+): Promise<MenuActionState> {
+  const itemId = String(formData.get("itemId") ?? "");
+  const categoryId = String(formData.get("categoryId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const basePrice = Number(formData.get("basePrice"));
+  const isVeg = formData.get("isVeg") === "on";
+  const isBestseller = formData.get("isBestseller") === "on";
+  const isAvailable = formData.get("isAvailable") === "on";
+  const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
+
+  if (!itemId || !categoryId || !name || Number.isNaN(basePrice) || basePrice < 0) {
+    return { error: "Category, name and a valid price are required." };
+  }
+
+  const restaurant = await requireCurrentRestaurant();
   const supabase = await createClient();
-  await supabase.from("menu_items").update({ is_available: isAvailable }).eq("id", itemId);
+
+  const { error } = await supabase
+    .from("menu_items")
+    .update({
+      category_id: categoryId,
+      name,
+      description,
+      base_price: basePrice,
+      is_veg: isVeg,
+      is_bestseller: isBestseller,
+      is_available: isAvailable,
+      image_url: imageUrl,
+    })
+    .eq("id", itemId)
+    .eq("restaurant_id", restaurant.restaurantId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/menu");
+  return { error: null, savedAt: Date.now() };
+}
+
+export async function toggleMenuItemAvailability(itemId: string, isAvailable: boolean) {
+  const restaurant = await requireCurrentRestaurant();
+  const supabase = await createClient();
+  await supabase
+    .from("menu_items")
+    .update({ is_available: isAvailable })
+    .eq("id", itemId)
+    .eq("restaurant_id", restaurant.restaurantId);
   revalidatePath("/dashboard/menu");
 }
