@@ -42,7 +42,7 @@ values
   ('luxury', 'Luxury', true),
   ('premium-dark', 'Premium Dark', true),
   ('cafe', 'Cafe', true),
-  ('indian', 'Indian', true),
+  ('local', 'Local / Congo', true),
   ('fast-food', 'Fast Food', true),
   ('coffee', 'Coffee', true),
   ('fine-dining', 'Fine Dining', true),
