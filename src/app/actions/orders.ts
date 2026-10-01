@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -167,7 +168,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
     if (!offer || !offer.is_active) return { error: "This coupon's offer is no longer active." };
     if (offer.min_order_value && subtotal < offer.min_order_value) {
-      return { error: `Minimum order value for this coupon is ₹${offer.min_order_value}.` };
+      return { error: `Minimum order value for this coupon is ${offer.min_order_value.toLocaleString("fr-FR")} XAF.` };
     }
 
     if (offer.type === "percentage" && offer.percentage_value) {
