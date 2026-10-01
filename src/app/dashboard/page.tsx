@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { createClient } from "@/lib/supabase/server";
+import { formatCurrency } from "@/lib/currency";
 
 export default async function DashboardOverviewPage() {
   const restaurant = await requireCurrentRestaurant();
@@ -44,7 +45,7 @@ export default async function DashboardOverviewPage() {
     { label: "Today's Orders", value: todayOrders?.length ?? 0 },
     { label: "Pending Orders", value: pendingOrders ?? 0 },
     { label: "Active Tables", value: activeTables ?? 0 },
-    { label: "Today's Revenue", value: `₹${todayRevenue}` },
+    { label: "Today's Revenue", value: formatCurrency(todayRevenue) },
   ];
 
   return (
@@ -84,7 +85,7 @@ export default async function DashboardOverviewPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="font-medium">₹{order.total_amount}</span>
+                <span className="font-medium">{formatCurrency(order.total_amount)}</span>
                 <Badge>{order.status}</Badge>
               </div>
             </div>
