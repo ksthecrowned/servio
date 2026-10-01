@@ -62,7 +62,7 @@ export function BillCard({ bill }: { bill: Bill }) {
               </Button>
             ) : (
               <p className="text-xs text-muted-foreground">
-                No UPI ID set. The owner can add one in Settings to show a payment QR here.
+                No Mobile Money ID set. The owner can add one in Settings to show a payment QR here.
               </p>
             )
           ) : null}
