@@ -4,5 +4,6 @@
 
 alter function public.set_updated_at() set search_path = public;
 
-revoke execute on function public.handle_new_auth_user() from anon, authenticated;
-revoke execute on function public.increment_coupon_usage(uuid) from anon, authenticated;
+revoke execute on function public.handle_new_auth_user() from public, anon, authenticated;
+revoke execute on function public.increment_coupon_usage(uuid) from public, anon, authenticated;
+grant execute on function public.increment_coupon_usage(uuid) to service_role;
