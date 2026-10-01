@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 import { AddCategoryForm } from "@/components/dashboard/add-category-form";
 import { AddItemForm } from "@/components/dashboard/add-item-form";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +76,7 @@ export default async function MenuPage() {
                     <span>{item.name}</span>
                     {!item.is_available && <Badge variant="outline">Unavailable</Badge>}
                   </div>
-                  <span className="font-medium">₹{item.base_price}</span>
+                  <span className="font-medium">{formatCurrency(item.base_price)}</span>
                 </div>
               ))}
             </CardContent>
