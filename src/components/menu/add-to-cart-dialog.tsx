@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 type Variant = { id: string; name: string; price: number; is_default: boolean };
 type Addon = { id: string; name: string; price: number };
@@ -109,7 +110,7 @@ export function AddToCartDialog({
                     variantId === variant.id ? "border-brand bg-brand text-brand-foreground" : "hover:bg-accent",
                   )}
                 >
-                  {variant.name} · ₹{variant.price}
+                  {variant.name} · {formatCurrency(variant.price)}
                 </button>
               ))}
             </div>
@@ -128,7 +129,7 @@ export function AddToCartDialog({
                     checked={addonIds.includes(addon.id)}
                     onChange={() => toggleAddon(addon.id)}
                   />
-                  {addon.name} (+₹{addon.price})
+                  {addon.name} (+{formatCurrency(addon.price)})
                 </label>
               ))}
             </div>
@@ -165,7 +166,7 @@ export function AddToCartDialog({
 
         <DialogFooter>
           <Button onClick={handleAdd} className="w-full">
-            Add to cart · ₹{total}
+            Add to cart · {formatCurrency(total)}
           </Button>
         </DialogFooter>
       </DialogContent>
