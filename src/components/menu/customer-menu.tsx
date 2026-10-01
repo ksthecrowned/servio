@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { AddToCartDialog, type MenuItemForCart } from "@/components/menu/add-to-cart-dialog";
 import { CartBar } from "@/components/menu/cart-bar";
 import { WaiterRequestButton } from "@/components/menu/waiter-request-button";
+import { formatCurrency } from "@/lib/currency";
 
 type Category = { id: string; name: string; menu_items: MenuItemForCart[] };
 
