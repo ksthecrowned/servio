@@ -2,6 +2,7 @@ import { formatCurrency } from "@/lib/currency";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/auto-refresh";
+import { FeedbackForm } from "@/components/menu/feedback-form";
 import { OrderStatusStepper } from "@/components/menu/order-status-stepper";
 import { Badge } from "@/components/ui/badge";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -31,13 +32,23 @@ export default async function OrderTrackingPage(
 
   const isFinal = ["served", "completed", "cancelled"].includes(order.status);
 
+  let hasFeedback = false;
+  if (isFinal && order.status !== "cancelled") {
+    const { data: feedback } = await admin
+      .from("feedback")
+      .select("id")
+      .eq("order_id", order.id)
+      .maybeSingle();
+    hasFeedback = Boolean(feedback);
+  }
+
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-16">
       {!isFinal && <AutoRefresh intervalMs={4000} />}
 
       <div className="pt-6 text-center">
         <p className="text-sm text-muted-foreground">{restaurant?.name}</p>
-        <h1 className="text-2xl font-semibold">Order #{order.order_number}</h1>
+        <h1 className="text-2xl font-semibold">Commande #{order.order_number}</h1>
         <Badge className="mt-2 capitalize">{order.status}</Badge>
       </div>
 
@@ -46,7 +57,7 @@ export default async function OrderTrackingPage(
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg border p-4">
-        <h2 className="font-medium">Items</h2>
+        <h2 className="font-medium">Articles</h2>
         {order.order_items.map((item) => (
           <div key={item.id} className="flex justify-between text-sm">
             <span>
@@ -58,30 +69,24 @@ export default async function OrderTrackingPage(
         ))}
 
         <div className="mt-2 flex flex-col gap-1 border-t pt-2 text-sm">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>{formatCurrency(order.subtotal)}</span>
-          </div>
-          {order.discount_amount > 0 && (
-            <div className="flex justify-between text-brand">
-              <span>Discount</span>
-              <span>−{formatCurrency(order.discount_amount)}</span>
-            </div>
-          )}
-          <div className="flex justify-between">
-            <span>Tax</span>
-            <span>{formatCurrency(order.tax_amount)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Service charge</span>
-            <span>{formatCurrency(order.service_charge_amount)}</span>
-          </div>
-          <div className="flex justify-between font-medium">
-            <span>Total</span>
-            <span>{formatCurrency(order.total_amount)}</span>
-          </div>
+          <div className="flex justify-between"><span>Sous-total</span><span>{formatCurrency(order.subtotal)}</span></div>
+          {order.discount_amount > 0 && <div className="flex justify-between text-brand"><span>Réduction</span><span>−{formatCurrency(order.discount_amount)}</span></div>}
+          <div className="flex justify-between"><span>Taxes</span><span>{formatCurrency(order.tax_amount)}</span></div>
+          <div className="flex justify-between"><span>Service</span><span>{formatCurrency(order.service_charge_amount)}</span></div>
+          <div className="flex justify-between font-medium"><span>Total</span><span>{formatCurrency(order.total_amount)}</span></div>
         </div>
       </div>
+
+      {isFinal && order.status !== "cancelled" && (
+        hasFeedback ? (
+          <div className="rounded-lg border bg-muted/30 p-4 text-center">
+            <p className="font-medium">Merci pour votre avis.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Votre retour a bien été enregistré.</p>
+          </div>
+        ) : (
+          <FeedbackForm orderId={order.id} restaurantSlug={restaurantSlug} branchSlug={branchSlug} />
+        )
+      )}
     </div>
   );
 }
