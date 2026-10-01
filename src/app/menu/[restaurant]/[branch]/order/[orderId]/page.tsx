@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/lib/currency";
 import { notFound } from "next/navigation";
 
 import { AutoRefresh } from "@/components/auto-refresh";
