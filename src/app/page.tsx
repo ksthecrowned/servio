@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 
 const FLOW = [
@@ -16,7 +17,7 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between border-b p-4">
-        <span className="text-lg font-semibold">THALIQ</span>
+        <BrandMark />
         <nav className="flex items-center gap-2">
           <Button asChild variant="ghost">
             <Link href="/staff">Staff sign in</Link>
@@ -36,7 +37,7 @@ export default function Home() {
             One QR. Your entire restaurant connected.
           </h1>
           <p className="max-w-xl text-lg text-muted-foreground">
-            Scan. Order. Serve. Manage. THALIQ is the QR-first restaurant operating system for
+            Scan. Order. Serve. Manage. Servio is the QR-first restaurant operating system for
             cafes, restaurants, bakeries and food courts.
           </p>
         </div>

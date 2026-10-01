@@ -18,7 +18,7 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 
 function storageKey(restaurant: string, branch: string, table?: string) {
-  return `thaliq_cart:${restaurant}:${branch}:${table ?? "general"}`;
+  return `servio_cart:${restaurant}:${branch}:${table ?? "general"}`;
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {

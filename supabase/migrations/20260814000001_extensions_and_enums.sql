@@ -1,4 +1,4 @@
--- THALIQ core schema: extensions and enum types.
+-- Servio core schema: extensions and enum types.
 
 create extension if not exists "pgcrypto";
 

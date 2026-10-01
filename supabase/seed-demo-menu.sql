@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- THALIQ — demo menu seed
+-- Servio — demo menu seed
 -- ---------------------------------------------------------------------------
 --
 -- Fills an existing restaurant with a realistic cafe/restaurant menu so the

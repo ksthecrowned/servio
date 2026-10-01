@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { BrandMark } from "@/components/brand-mark";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
@@ -12,9 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex min-h-screen">
       <aside className="hidden w-64 shrink-0 border-r p-4 md:flex md:flex-col md:justify-between">
         <div>
-          <Link href="/dashboard" className="mb-6 block px-3 text-lg font-semibold">
-            THALIQ
-          </Link>
+          <BrandMark href="/dashboard" className="mb-6 px-3" />
           <SidebarNav />
         </div>
         <div className="border-t pt-4">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { SignupForm } from "@/components/auth/signup-form";
 
-export const metadata: Metadata = { title: "Create account — THALIQ" };
+export const metadata: Metadata = { title: "Create account — Servio" };
 
 export default function SignupPage() {
   return (

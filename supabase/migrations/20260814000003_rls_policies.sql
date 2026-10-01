@@ -1,4 +1,4 @@
--- THALIQ RLS policies.
+-- Servio RLS policies.
 --
 -- Critical rule (PRD section 51): Restaurant A must never be able to access
 -- Restaurant B's data.

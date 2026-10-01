@@ -84,17 +84,129 @@ export async function markOrderServed(orderId: string) {
   revalidatePath("/staff/waiter");
 }
 
-export async function resolveWaiterRequest(requestId: string) {
+type OwnedRequest = {
+  id: string;
+  branch_id: string;
+  resolved_at: string | null;
+  acknowledged_at: string | null;
+  assigned_staff_id: string | null;
+};
+
+async function loadOwnedRequest(
+  admin: ReturnType<typeof createAdminClient>,
+  session: { restaurantId: string; branchId: string | null },
+  requestId: string,
+): Promise<OwnedRequest | null> {
+  const { data } = await admin
+    .from("waiter_requests")
+    .select("id, branch_id, resolved_at, acknowledged_at, assigned_staff_id, branches!inner(restaurant_id)")
+    .eq("id", requestId)
+    .maybeSingle();
+
+  if (!data) return null;
+
+  const restaurantId = (data.branches as unknown as { restaurant_id: string }).restaurant_id;
+  if (restaurantId !== session.restaurantId) return null;
+  if (session.branchId && data.branch_id !== session.branchId) return null;
+
+  return {
+    id: data.id,
+    branch_id: data.branch_id,
+    resolved_at: data.resolved_at,
+    acknowledged_at: data.acknowledged_at,
+    assigned_staff_id: data.assigned_staff_id,
+  };
+}
+
+export async function claimWaiterRequest(requestId: string): Promise<{ error: string | null }> {
   const session = await requireStaffSession("waiter");
   const admin = createAdminClient();
+  const request = await loadOwnedRequest(admin, session, requestId);
 
-  await admin
+  if (!request || request.resolved_at) return { error: "Cette demande n’est plus ouverte." };
+  if (request.assigned_staff_id && request.assigned_staff_id !== session.staffId) {
+    return { error: "Un autre serveur a déjà pris cette demande." };
+  }
+
+  const { error } = await admin
     .from("waiter_requests")
-    .update({ resolved_at: new Date().toISOString(), resolved_by_staff_id: session.staffId })
+    .update({
+      acknowledged_at: request.acknowledged_at ?? new Date().toISOString(),
+      assigned_staff_id: session.staffId,
+    })
     .eq("id", requestId)
-    .eq("branch_id", session.branchId ?? "");
+    .is("resolved_at", null);
 
   revalidatePath("/staff/waiter");
+  return { error: error?.message ?? null };
+}
+
+export async function resolveWaiterRequest(requestId: string): Promise<{ error: string | null }> {
+  const session = await requireStaffSession("waiter");
+  const admin = createAdminClient();
+  const request = await loadOwnedRequest(admin, session, requestId);
+
+  if (!request || request.resolved_at) return { error: "Cette demande n’est plus ouverte." };
+  if (request.assigned_staff_id && request.assigned_staff_id !== session.staffId) {
+    return { error: "Cette demande est tenue par un autre serveur." };
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await admin
+    .from("waiter_requests")
+    .update({
+      acknowledged_at: request.acknowledged_at ?? now,
+      assigned_staff_id: request.assigned_staff_id ?? session.staffId,
+      resolved_at: now,
+      resolved_by_staff_id: session.staffId,
+    })
+    .eq("id", requestId)
+    .is("resolved_at", null);
+
+  revalidatePath("/staff/waiter");
+  return { error: error?.message ?? null };
+}
+
+export async function transferWaiterRequest(
+  requestId: string,
+  targetStaffId: string,
+): Promise<{ error: string | null }> {
+  const session = await requireStaffSession("waiter");
+  const admin = createAdminClient();
+  const request = await loadOwnedRequest(admin, session, requestId);
+
+  if (!request || request.resolved_at) return { error: "Cette demande n’est plus ouverte." };
+  if (request.assigned_staff_id !== session.staffId) {
+    return { error: "Prenez d’abord la demande en charge." };
+  }
+  if (targetStaffId === session.staffId) return { error: "Choisissez un autre serveur." };
+
+  const { data: target } = await admin
+    .from("staff")
+    .select("id, branch_id")
+    .eq("id", targetStaffId)
+    .eq("restaurant_id", session.restaurantId)
+    .eq("role", "waiter")
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!target) return { error: "Serveur introuvable." };
+  if (session.branchId && target.branch_id && target.branch_id !== session.branchId) {
+    return { error: "Ce serveur n’est pas sur cette salle." };
+  }
+
+  const { error } = await admin
+    .from("waiter_requests")
+    .update({
+      assigned_staff_id: targetStaffId,
+      acknowledged_at: new Date().toISOString(),
+    })
+    .eq("id", requestId)
+    .eq("assigned_staff_id", session.staffId)
+    .is("resolved_at", null);
+
+  revalidatePath("/staff/waiter");
+  return { error: error?.message ?? null };
 }
 
 export async function markBillPaid(billId: string, method: "cash" | "upi" | "card") {

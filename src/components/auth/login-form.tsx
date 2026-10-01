@@ -15,7 +15,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Sign in to THALIQ</CardTitle>
+        <CardTitle>Sign in to Servio</CardTitle>
         <CardDescription>Manage your restaurant from one dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -33,7 +33,7 @@ export function LoginForm() {
             {isPending ? "Signing in…" : "Sign in"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            New to THALIQ?{" "}
+            New to Servio?{" "}
             <Link href="/signup" className="text-foreground underline underline-offset-4">
               Create an account
             </Link>

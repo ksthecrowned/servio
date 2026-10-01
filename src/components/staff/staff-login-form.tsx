@@ -17,7 +17,7 @@ const ROLES = [
 ];
 
 const PIN_LENGTH = 4;
-const REMEMBERED_KEY = "thaliq_staff_restaurant";
+const REMEMBERED_KEY = "servio_staff_restaurant";
 
 type Restaurant = { slug: string; name: string };
 
@@ -133,7 +133,7 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
               spellCheck={false}
             />
             <p className="text-xs text-muted-foreground">
-              Your manager can find this on the Staff page of the THALIQ dashboard.
+              Your manager can find this on the Staff page of the Servio dashboard.
             </p>
           </div>
 

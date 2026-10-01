@@ -29,7 +29,7 @@ export default async function AdminOverviewPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">Platform overview</h1>
-        <p className="text-muted-foreground">THALIQ across every restaurant on the platform.</p>
+        <p className="text-muted-foreground">Servio across every restaurant on the platform.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

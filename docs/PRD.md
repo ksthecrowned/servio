@@ -1,6 +1,6 @@
-# THALIQ — Complete SaaS Product Requirements Document
+# Servio — Complete SaaS Product Requirements Document
 
-Product: THALIQ
+Product: Servio
 Category: Restaurant & Cafe Management SaaS
 Platform: Web App + PWA
 Primary Market: India
@@ -12,7 +12,7 @@ Version: 1.0 MVP
 
 ## 1. Product Vision
 
-THALIQ is a QR-first restaurant operating system for cafes, restaurants, bakeries, food courts and similar businesses.
+Servio is a QR-first restaurant operating system for cafes, restaurants, bakeries, food courts and similar businesses.
 
 The core experience:
 
@@ -36,7 +36,7 @@ Payment / Bill
 Analytics
 ```
 
-THALIQ should not be positioned as merely a QR Menu Generator.
+Servio should not be positioned as merely a QR Menu Generator.
 
 **Positioning**
 
@@ -48,7 +48,7 @@ THALIQ should not be positioned as merely a QR Menu Generator.
 
 ---
 
-## 2. Problems THALIQ Solves
+## 2. Problems Servio Solves
 
 Traditional restaurants face:
 
@@ -65,7 +65,7 @@ Traditional restaurants face:
 - Multiple branch management
 - Expensive POS systems
 
-THALIQ combines these workflows into one SaaS.
+Servio combines these workflows into one SaaS.
 
 ---
 
@@ -93,9 +93,9 @@ THALIQ combines these workflows into one SaaS.
 
 ## 4. User Types
 
-THALIQ has five primary user types.
+Servio has five primary user types.
 
-1. **SaaS Admin** — THALIQ platform owner.
+1. **SaaS Admin** — Servio platform owner.
 2. **Restaurant Owner** — Complete control over their business.
 3. **Restaurant Manager** — Operational management.
 4. **Restaurant Staff** — Waiter, Kitchen, Cashier.
@@ -106,7 +106,7 @@ THALIQ has five primary user types.
 ## 5. Overall System Architecture
 
 ```
-THALIQ
+Servio
                             │
           ┌─────────────────┼─────────────────┐
           │                 │                 │
@@ -401,7 +401,7 @@ Notification events: new order, waiter request, bill request, payment received, 
 
 ## 26. PWA Staff App
 
-Staff can install THALIQ on Android (Open → Install → Home Screen → Push Notifications), receiving alerts even when not actively looking at the dashboard, subject to browser/device notification permissions.
+Staff can install Servio on Android (Open → Install → Home Screen → Push Notifications), receiving alerts even when not actively looking at the dashboard, subject to browser/device notification permissions.
 
 ---
 
@@ -409,7 +409,7 @@ Staff can install THALIQ on Android (Open → Install → Home Screen → Push N
 
 **MVP**: device notification, PWA sound, push notification.
 
-**Future**: dedicated THALIQ Alert Box (THALIQ Cloud → Restaurant Wi-Fi → Alert Box → Speaker/LED). New Order → 3 beeps, Waiter → 2 beeps, Bill → 1 beep.
+**Future**: dedicated Servio Alert Box (Servio Cloud → Restaurant Wi-Fi → Alert Box → Speaker/LED). New Order → 3 beeps, Waiter → 2 beeps, Bill → 1 beep.
 
 ---
 
@@ -551,7 +551,7 @@ Centralized reporting across branches (Jodhpur, Jaipur, Delhi, …).
 
 ## 46. Super Admin Dashboard
 
-THALIQ platform owner dashboard tracking restaurants, active subscriptions, trials, MRR, orders, users.
+Servio platform owner dashboard tracking restaurants, active subscriptions, trials, MRR, orders, users.
 
 Modules: Restaurants, Users, Plans, Subscriptions, Payments, Templates, Support, Analytics, System settings.
 
@@ -715,13 +715,13 @@ Inventory, Online Payments, WhatsApp, Advanced Analytics, Feedback, Multi-Branch
 
 ## 56. Version 3
 
-Loyalty, CRM, Marketing Automation, POS Integration, GST Billing, Printer Integration, Custom Domain, White Label, API, THALIQ Alert Box.
+Loyalty, CRM, Marketing Automation, POS Integration, GST Billing, Printer Integration, Custom Domain, White Label, API, Servio Alert Box.
 
 ---
 
 ## 57. Key Product Differentiator
 
-THALIQ should not compete as "another QR menu." Instead: QR → Menu → Order → Table → Kitchen → Staff → Payment → Analytics. One system connects the restaurant.
+Servio should not compete as "another QR menu." Instead: QR → Menu → Order → Table → Kitchen → Staff → Payment → Analytics. One system connects the restaurant.
 
 ---
 
@@ -745,7 +745,7 @@ Order → Push Notification → Sound → Staff Device / Kitchen Display → Acc
 
 ## 61. Final Business Model
 
-THALIQ earns through SaaS subscriptions (₹499 → ₹999 → ₹1,999/month).
+Servio earns through SaaS subscriptions (₹499 → ₹999 → ₹1,999/month).
 
 Future revenue: premium templates, white-label, custom domains, WhatsApp credits, payment services, hardware alert devices, multi-branch plans, enterprise plans.
 
@@ -753,7 +753,7 @@ Future revenue: premium templates, white-label, custom domains, WhatsApp credits
 
 ## 62. Final Product Definition
 
-THALIQ is a restaurant operating system that starts with a QR code and connects the complete customer-to-kitchen workflow.
+Servio is a restaurant operating system that starts with a QR code and connects the complete customer-to-kitchen workflow.
 
 Recommended production stack:
 

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { CustomerMenu } from "@/components/menu/customer-menu";
+import { GuestExperience } from "@/components/menu/guest-experience";
 import { getMenuData, resolveTable } from "@/lib/menu-data";
+import { ensureOpenTableSession } from "@/lib/table-session";
 
 export default async function TableMenuPage(
   props: PageProps<"/menu/[restaurant]/[branch]/[table]">,
@@ -15,14 +16,16 @@ export default async function TableMenuPage(
 
   if (!table) notFound();
 
+  const session = await ensureOpenTableSession(data.branch.id, table.id);
+
   return (
-    <CustomerMenu
+    <GuestExperience
       restaurant={data.restaurant}
       categories={data.categories}
       tableLabel={table.label}
       branchId={data.branch.id}
       tableId={table.id}
-      theme={data.theme}
+      sessionOpenedAt={session?.openedAt ?? new Date().toISOString()}
     />
   );
 }

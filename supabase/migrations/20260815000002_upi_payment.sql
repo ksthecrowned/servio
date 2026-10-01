@@ -1,7 +1,7 @@
 -- UPI collection details for in-person payment (PRD section 35's MVP scope:
 -- cash / UPI / card with a manually recorded status).
 --
--- No payment gateway is involved: THALIQ builds a standard `upi://pay` deep
+-- No payment gateway is involved: Servio builds a standard `upi://pay` deep
 -- link from these fields and renders it as a QR. The customer's UPI app pays
 -- the restaurant directly, so there is nothing to settle, no per-transaction
 -- fee, and no gateway account to onboard. The cashier still confirms receipt

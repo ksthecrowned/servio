@@ -19,9 +19,6 @@ export default async function QrPage() {
 
   const branchCards = await Promise.all(
     (branches ?? []).map(async (branch) => {
-      const generalUrl = `${siteUrl()}/menu/${restaurant.restaurantSlug}/${branch.slug}`;
-      const generalQr = await QRCode.toDataURL(generalUrl, { margin: 1, width: 160 });
-
       const tableQrs = await Promise.all(
         branch.restaurant_tables.map(async (table) => {
           const url = `${siteUrl()}/menu/${restaurant.restaurantSlug}/${branch.slug}/${table.id}`;
@@ -30,7 +27,7 @@ export default async function QrPage() {
         }),
       );
 
-      return { ...branch, generalUrl, generalQr, tableQrs };
+      return { ...branch, tableQrs };
     }),
   );
 
@@ -39,8 +36,8 @@ export default async function QrPage() {
       <div>
         <h1 className="text-2xl font-semibold">QR Codes</h1>
         <p className="text-muted-foreground">
-          Table QR codes route straight to a pre-identified table. Menu changes never require
-          reprinting.
+          Each table has its own QR. Guests open the menu only after scanning the code on their
+          table.
         </p>
       </div>
 
@@ -50,15 +47,6 @@ export default async function QrPage() {
             <CardTitle className="text-base">{branch.name}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-6 flex items-center gap-4 border-b pb-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={branch.generalQr} alt="General menu QR" className="size-24 rounded" />
-              <div>
-                <p className="font-medium">General menu QR</p>
-                <p className="text-xs break-all text-muted-foreground">{branch.generalUrl}</p>
-              </div>
-            </div>
-
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {branch.tableQrs.map((table) => (
                 <div key={table.id} className="flex items-center gap-3 rounded-md border p-3">

@@ -34,7 +34,7 @@ export function SignupForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Create your THALIQ account</CardTitle>
+        <CardTitle>Create your Servio account</CardTitle>
         <CardDescription>Set up your restaurant in a few minutes.</CardDescription>
       </CardHeader>
       <CardContent>

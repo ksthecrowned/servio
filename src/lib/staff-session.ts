@@ -10,7 +10,7 @@ export type StaffSession = {
   name: string;
 };
 
-export const STAFF_SESSION_COOKIE = "thaliq_staff_session";
+export const STAFF_SESSION_COOKIE = "servio_staff_session";
 
 function secret(): string {
   const value = process.env.STAFF_SESSION_SECRET;

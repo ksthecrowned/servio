@@ -24,11 +24,21 @@ export default async function BrandingPage() {
         .maybeSingle(),
       supabase
         .from("branches")
-        .select("slug")
+        .select("id, slug")
         .eq("restaurant_id", restaurant.restaurantId)
         .limit(1)
         .maybeSingle(),
     ]);
+
+  const { data: previewTable } = branch
+    ? await supabase
+        .from("restaurant_tables")
+        .select("id")
+        .eq("branch_id", branch.id)
+        .order("label")
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
 
   // No subscription row yet means the restaurant is still in its trial, which
   // the PRD gives Business-level features (section 48) — so premium templates
@@ -45,9 +55,9 @@ export default async function BrandingPage() {
             Change how your QR menu looks. Your menu items and prices stay exactly as they are.
           </p>
         </div>
-        {branch ? (
+        {branch && previewTable ? (
           <Link
-            href={`/menu/${restaurant.restaurantSlug}/${branch.slug}`}
+            href={`/menu/${restaurant.restaurantSlug}/${branch.slug}/${previewTable.id}`}
             target="_blank"
             className="text-sm underline underline-offset-4"
           >

@@ -34,7 +34,7 @@ export default async function StaffPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Staff sign-in</CardTitle>
-          <CardDescription>How your team gets into THALIQ on their own phones.</CardDescription>
+          <CardDescription>How your team gets into Servio on their own phones.</CardDescription>
         </CardHeader>
         <CardContent>
           <StaffLoginCard

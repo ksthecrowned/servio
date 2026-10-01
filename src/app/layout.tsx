@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "THALIQ — One QR. Your entire restaurant connected.",
+  title: "Servio — One QR. Your entire restaurant connected.",
   description:
-    "THALIQ is a QR-first restaurant operating system: digital menu, ordering, kitchen display, staff notifications and analytics in one SaaS.",
+    "Servio is a QR-first restaurant operating system: digital menu, ordering, kitchen display, staff notifications and analytics in one SaaS.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

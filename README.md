@@ -1,4 +1,4 @@
-# THALIQ
+# Servio
 
 > One QR. Your entire restaurant connected.
 
@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%7C%20Auth%20%7C%20Storage-3ECF8E?logo=supabase)](https://supabase.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com)
 
-THALIQ is a QR-first restaurant operating system: digital menu, ordering, live
+Servio is a QR-first restaurant operating system: digital menu, ordering, live
 kitchen display, staff notifications, and analytics in a single SaaS. Full
 product spec: [`docs/PRD.md`](docs/PRD.md).
 

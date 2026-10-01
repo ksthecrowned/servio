@@ -8,6 +8,7 @@ export async function requestWaiterAssistance(
   branchId: string,
   tableId: string,
   type: string,
+  note?: string,
 ): Promise<{ error: string | null }> {
   if (!VALID_TYPES.includes(type)) {
     return { error: "Invalid request type." };
@@ -26,7 +27,12 @@ export async function requestWaiterAssistance(
     return { error: "Table not found." };
   }
 
-  const { error } = await admin.from("waiter_requests").insert({ branch_id: branchId, table_id: tableId, type });
+  const { error } = await admin.from("waiter_requests").insert({
+    branch_id: branchId,
+    table_id: tableId,
+    type,
+    note: note?.trim() ? note.trim().slice(0, 500) : null,
+  });
 
   if (type === "bill") {
     await admin.from("restaurant_tables").update({ status: "bill_requested" }).eq("id", tableId);
@@ -34,6 +40,28 @@ export async function requestWaiterAssistance(
   }
 
   return { error: error?.message ?? null };
+}
+
+export type TableRequest = {
+  id: string;
+  type: string;
+  note: string | null;
+  created_at: string;
+  acknowledged_at: string | null;
+  resolved_at: string | null;
+};
+
+export async function listTableRequests(branchId: string, tableId: string): Promise<TableRequest[]> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("waiter_requests")
+    .select("id, type, note, created_at, acknowledged_at, resolved_at")
+    .eq("branch_id", branchId)
+    .eq("table_id", tableId)
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  return data ?? [];
 }
 
 async function raiseBillForTable(

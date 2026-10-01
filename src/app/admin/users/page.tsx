@@ -9,7 +9,7 @@ export default async function AdminUsersPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">Users</h1>
-        <p className="text-muted-foreground">Everyone with a THALIQ account.</p>
+        <p className="text-muted-foreground">Everyone with a Servio account.</p>
       </div>
 
       <Card>

@@ -14,7 +14,7 @@ export function CartBar() {
 
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl p-4">
+      <div className="fixed bottom-4 left-1/2 z-40 w-[min(720px,calc(100%-2rem))] -translate-x-1/2">
         <Button
           onClick={() => setOpen(true)}
           className="flex w-full items-center justify-between px-4 py-6 text-base shadow-lg"

@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { BrandMark } from "@/components/brand-mark";
 import { AdminSidebarNav } from "@/components/admin/admin-sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
@@ -12,9 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen">
       <aside className="hidden w-64 shrink-0 border-r p-4 md:flex md:flex-col md:justify-between">
         <div>
-          <Link href="/admin" className="mb-6 block px-3 text-lg font-semibold">
-            THALIQ Admin
-          </Link>
+          <BrandMark href="/admin" label="Servio Admin" className="mb-6 px-3" />
           <AdminSidebarNav />
         </div>
         <form action={signOutOwner} className="px-3">

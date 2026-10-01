@@ -3,7 +3,7 @@
  *
  * Rendered as a QR, any UPI app (GPay, PhonePe, Paytm, bank apps) will open
  * with the payee and amount pre-filled. Money moves directly from customer
- * to restaurant — THALIQ is not in the payment path, so this needs no
+ * to restaurant — Servio is not in the payment path, so this needs no
  * gateway, no merchant onboarding and costs nothing per transaction.
  */
 export function buildUpiUri({

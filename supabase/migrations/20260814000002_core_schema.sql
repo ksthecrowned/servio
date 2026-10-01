@@ -1,7 +1,7 @@
--- THALIQ core schema: tables.
+-- Servio core schema: tables.
 --
 -- Auth is handled by Supabase (auth.users). `profiles` mirrors the subset of
--- user data THALIQ needs and is kept in sync via the trigger at the bottom
+-- user data Servio needs and is kept in sync via the trigger at the bottom
 -- of this file.
 
 create or replace function set_updated_at()
@@ -29,7 +29,7 @@ create trigger profiles_set_updated_at
   before update on profiles
   for each row execute function set_updated_at();
 
--- Platform (THALIQ) staff — separate from restaurant staff.
+-- Platform (Servio) staff — separate from restaurant staff.
 create table platform_admins (
   user_id uuid primary key references auth.users (id) on delete cascade,
   created_at timestamptz not null default now()

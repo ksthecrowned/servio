@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { StaffLoginForm } from "@/components/staff/staff-login-form";
 
-export const metadata: Metadata = { title: "Staff sign in — THALIQ" };
+export const metadata: Metadata = { title: "Staff sign in — Servio" };
 
 export default async function StaffLoginPage(props: PageProps<"/staff">) {
   const searchParams = await props.searchParams;
