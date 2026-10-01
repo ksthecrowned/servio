@@ -50,6 +50,15 @@ export async function addMenuItem(
   const restaurant = await requireCurrentRestaurant();
   const supabase = await createClient();
 
+  const { data: category } = await supabase
+    .from("menu_categories")
+    .select("id")
+    .eq("id", categoryId)
+    .eq("restaurant_id", restaurant.restaurantId)
+    .maybeSingle();
+
+  if (!category) return { error: "Invalid category." };
+
   const { error } = await supabase.from("menu_items").insert({
     restaurant_id: restaurant.restaurantId,
     category_id: categoryId,
@@ -87,6 +96,15 @@ export async function updateMenuItem(
 
   const restaurant = await requireCurrentRestaurant();
   const supabase = await createClient();
+
+  const { data: category } = await supabase
+    .from("menu_categories")
+    .select("id")
+    .eq("id", categoryId)
+    .eq("restaurant_id", restaurant.restaurantId)
+    .maybeSingle();
+
+  if (!category) return { error: "Invalid category." };
 
   const { error } = await supabase
     .from("menu_items")
