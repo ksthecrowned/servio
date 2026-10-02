@@ -1364,6 +1364,41 @@ export type Database = {
           },
         ];
       };
+      staff_login_attempts: {
+        Row: {
+          created_at: string;
+          id: string;
+          ip: string;
+          restaurant_id: string;
+          role: Database["public"]["Enums"]["restaurant_role"];
+          succeeded: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          ip: string;
+          restaurant_id: string;
+          role: Database["public"]["Enums"]["restaurant_role"];
+          succeeded?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          ip?: string;
+          restaurant_id?: string;
+          role?: Database["public"]["Enums"]["restaurant_role"];
+          succeeded?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_login_attempts_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       subscription_plans: {
         Row: {
           features: NonNullable<Json>;
@@ -1633,6 +1668,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      begin_staff_login_attempt: {
+        Args: {
+          p_ip: string;
+          p_restaurant_id: string;
+          p_role: Database["public"]["Enums"]["restaurant_role"];
+        };
+        Returns: string;
+      };
+      complete_staff_login_attempt: { Args: { p_attempt_id: string }; Returns: undefined };
       dearmor: { Args: { "": string }; Returns: string };
       gen_random_uuid: { Args: Record<PropertyKey, never>; Returns: string };
       gen_salt: { Args: { "": string }; Returns: string };
