@@ -21,12 +21,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
       - name: Build
-        run: npm run build
+        run: bun run build
         env:
           # Placeholders: the build must not need real credentials.
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
@@ -58,13 +60,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run db:verify
-      - run: npm run db:types
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run db:verify
+      - run: bun run db:types
       - name: Generated types are up to date
         run: |
           git diff --exit-code -- src/lib/supabase/database.types.ts || {
-            echo "::error::database.types.ts is stale. Run 'npm run db:verify && npm run db:types' and commit the result."
+            echo "::error::database.types.ts is stale. Run 'bun run db:verify && bun run db:types' and commit the result."
             exit 1
           }

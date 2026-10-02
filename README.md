@@ -45,9 +45,9 @@ Next.js 16 renames `middleware.ts` to `proxy.ts` — see `src/proxy.ts`.
 ## Getting started
 
 ```bash
-npm install
+bun install
 cp .env.example .env.local   # fill in Supabase project credentials
-npm run dev
+bun run dev
 ```
 
 ### Database
@@ -75,8 +75,8 @@ throwaway Postgres ≥ 15 server and run:
 
 ```bash
 export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/postgres
-npm run db:verify   # fresh DB, applies every migration, runs supabase/tests/*.test.sql
-npm run db:types    # regenerates database.types.ts from that DB
+bun run db:verify   # fresh DB, applies every migration, runs supabase/tests/*.test.sql
+bun run db:types    # regenerates database.types.ts from that DB
 ```
 
 `supabase/tests/00_platform_stubs.sql` provides the minimal `auth`/`storage`

@@ -1,4 +1,4 @@
-// Generated from the migrations by `npm run db:verify && npm run db:types`
+// Generated from the migrations by `bun run db:verify && bun run db:types`
 // (see scripts/db-types.sh). CI fails if database.types.ts is stale.
 export type {
   Database,

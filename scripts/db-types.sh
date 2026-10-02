@@ -9,8 +9,8 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 out="$root/src/lib/supabase/database.types.ts"
 
-npx supabase gen types typescript \
+bunx supabase gen types typescript \
   --db-url "${DATABASE_URL%/*}/servio_verify?sslmode=disable" \
   --schema public > "$out" 2> /dev/null
-npx oxfmt "$out" > /dev/null 2>&1
+bunx oxfmt "$out" > /dev/null 2>&1
 echo "wrote ${out#"$root"/}"
