@@ -19,9 +19,16 @@ create table auth.users (
   raw_user_meta_data jsonb
 );
 
+-- Same definition as Supabase: PostgREST >= 9 sets request.jwt.claims
+-- (JSON); the per-claim setting is the legacy form, still used by tests.
 create function auth.uid() returns uuid
 language sql stable
-as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+as $$
+  select coalesce(
+    nullif(current_setting('request.jwt.claim.sub', true), ''),
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
+  )::uuid
+$$;
 
 create schema storage;
 

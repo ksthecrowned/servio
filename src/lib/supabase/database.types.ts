@@ -1677,6 +1677,10 @@ export type Database = {
         Returns: string;
       };
       complete_staff_login_attempt: { Args: { p_attempt_id: string }; Returns: undefined };
+      create_restaurant: {
+        Args: { p_branch_name: string; p_cuisine_type?: string; p_name: string; p_slug: string };
+        Returns: string;
+      };
       dearmor: { Args: { "": string }; Returns: string };
       gen_random_uuid: { Args: Record<PropertyKey, never>; Returns: string };
       gen_salt: { Args: { "": string }; Returns: string };
