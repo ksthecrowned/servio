@@ -67,6 +67,24 @@ applied in filename order:
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.
 
+#### Verifying migrations and regenerating types
+
+`src/lib/supabase/database.types.ts` is generated from the migrations, not
+from a live project. After changing a migration, point `DATABASE_URL` at a
+throwaway Postgres ≥ 15 server and run:
+
+```bash
+export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/postgres
+npm run db:verify   # fresh DB, applies every migration, runs supabase/tests/*.test.sql
+npm run db:types    # regenerates database.types.ts from that DB
+```
+
+`supabase/tests/00_platform_stubs.sql` provides the minimal `auth`/`storage`
+objects and API roles a real Supabase project already has — never run it
+against a real project. CI (`.github/workflows/ci.yml`) runs lint,
+typecheck and build, plus the two commands above, and fails if the
+committed types are stale.
+
 Required env vars (see `.env.example`):
 
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from your
