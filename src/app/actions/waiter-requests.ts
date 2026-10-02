@@ -1,6 +1,8 @@
 "use server";
 
+import { clientIp } from "@/lib/client-ip";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { userFacingError } from "@/lib/supabase/errors";
 
 const VALID_TYPES = ["call_waiter", "water", "cutlery", "bill", "other"] as const;
 type WaiterRequestType = (typeof VALID_TYPES)[number];
@@ -32,19 +34,50 @@ export async function requestWaiterAssistance(
     return { error: "Table introuvable." };
   }
 
+  const cleanNote = note?.trim() ? note.trim().slice(0, 500) : null;
+
+  // The same request already waiting: don't ring the staff twice.
+  let duplicate = admin
+    .from("waiter_requests")
+    .select("id")
+    .eq("table_id", tableId)
+    .eq("type", type)
+    .is("resolved_at", null)
+    .limit(1);
+  duplicate = cleanNote === null ? duplicate.is("note", null) : duplicate.eq("note", cleanNote);
+  const { data: existing } = await duplicate;
+  if (existing && existing.length > 0) {
+    return { error: "Cette demande est déjà en cours." };
+  }
+
+  // Rate limit (per table and per device), given back if the insert fails.
+  const { data: attemptId, error: limitError } = await admin.rpc("begin_guest_action", {
+    p_table_id: tableId,
+    p_ip: await clientIp(),
+    p_action: "request",
+  });
+  if (limitError || !attemptId) {
+    return { error: userFacingError(limitError, "Impossible d’envoyer la demande. Réessayez.") };
+  }
+
   const { error } = await admin.from("waiter_requests").insert({
     branch_id: branchId,
     table_id: tableId,
     type,
-    note: note?.trim() ? note.trim().slice(0, 500) : null,
+    note: cleanNote,
   });
+
+  if (error) {
+    await admin.rpc("cancel_guest_action", { p_id: attemptId });
+    return { error: userFacingError(error, "Impossible d’envoyer la demande. Réessayez.") };
+  }
 
   if (type === "bill") {
     await admin.from("restaurant_tables").update({ status: "bill_requested" }).eq("id", tableId);
     await raiseBillForTable(admin, branchId, tableId, (table.branches as unknown as { restaurant_id: string }).restaurant_id);
   }
 
-  return { error: error?.message ?? null };
+  return { error: null };
 }
 
 export type TableRequest = {

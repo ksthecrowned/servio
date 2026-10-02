@@ -1,8 +1,9 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { clientIp } from "@/lib/client-ip";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   signStaffSession,
@@ -24,21 +25,6 @@ const ROLE_HOME: Record<StaffRole, string> = {
 
 function isStaffRole(value: string): value is StaffRole {
   return Object.hasOwn(ROLE_HOME, value);
-}
-
-/**
- * Client IP for sign-in throttling. On Vercel the first x-forwarded-for
- * entry is set by the platform and cannot be spoofed; behind another proxy
- * make sure it overwrites the header. If it is spoofable, only the per-IP
- * limit is weakened — the per-role limit still applies.
- */
-async function clientIp(): Promise<string> {
-  const headerStore = await headers();
-  return (
-    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headerStore.get("x-real-ip")?.trim() ||
-    "unknown"
-  );
 }
 
 /**
