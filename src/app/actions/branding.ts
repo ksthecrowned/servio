@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { loadPlanAccess } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
 export type BrandingActionState = { error: string | null; success: boolean };
@@ -35,12 +36,20 @@ export async function updateBranding(
     // dangling reference.
     const { data: template } = await supabase
       .from("templates")
-      .select("id")
+      .select("id, is_premium")
       .eq("id", templateId)
       .maybeSingle();
 
     if (!template) {
       return { error: "That template no longer exists.", success: false };
+    }
+
+    // Enforced here, not only by the locked cards in the form.
+    if (template.is_premium) {
+      const access = await loadPlanAccess(supabase, restaurant.restaurantId);
+      if (access.effectiveTier === "starter") {
+        return { error: "Premium templates need the Business or Pro plan.", success: false };
+      }
     }
   }
 

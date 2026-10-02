@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { createOffer, updateOffer } from "@/app/actions/offers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,12 +28,20 @@ const typeLabels: Record<string, string> = {
   happy_hour: "Happy hour",
 };
 
-export function OfferForm({ offer, onDone }: { offer?: Offer; onDone?: () => void }) {
+/** Types guests can redeem at checkout today (see place_order). */
+const ORDERABLE_TYPES = ["percentage", "flat"];
+
+export function OfferForm({ offer }: { offer?: Offer }) {
   const [type, setType] = useState(offer?.type ?? "percentage");
-  const action = offer ? updateOffer : createOffer;
+  const [state, formAction, isPending] = useActionState(offer ? updateOffer : createOffer, { error: null });
+  // An existing offer of a legacy type stays editable, but new offers only
+  // offer the types that can actually be priced.
+  const typeOptions = Object.entries(typeLabels).filter(
+    ([value]) => ORDERABLE_TYPES.includes(value) || value === offer?.type,
+  );
 
   return (
-    <form action={async (formData) => { await action(formData); onDone?.(); }} className="grid gap-4">
+    <form action={formAction} className="grid gap-4">
       {offer && <input type="hidden" name="id" value={offer.id} />}
       <div className="grid gap-2">
         <Label htmlFor={offer ? `offer-name-${offer.id}` : "offer-name"}>Nom</Label>
@@ -44,12 +52,15 @@ export function OfferForm({ offer, onDone }: { offer?: Offer; onDone?: () => voi
         <Select name="type" value={type} onValueChange={setType}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            {Object.entries(typeLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+            {typeOptions.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
           </SelectContent>
         </Select>
+        {!ORDERABLE_TYPES.includes(type) && (
+          <p className="text-xs text-muted-foreground">Ce type n’est pas encore utilisable par les clients : ses coupons seront refusés à la commande.</p>
+        )}
       </div>
-      {type === "percentage" && <div className="grid gap-2"><Label>Réduction (%)</Label><Input name="percentage_value" type="number" min="0" max="100" step="0.01" defaultValue={offer?.percentage_value ?? ""} /></div>}
-      {type === "flat" && <div className="grid gap-2"><Label>Réduction (XAF)</Label><Input name="flat_value" type="number" min="0" step="1" defaultValue={offer?.flat_value ?? ""} /></div>}
+      {type === "percentage" && <div className="grid gap-2"><Label>Réduction (%)</Label><Input name="percentage_value" type="number" min="0.01" max="100" step="0.01" defaultValue={offer?.percentage_value ?? ""} required /></div>}
+      {type === "flat" && <div className="grid gap-2"><Label>Réduction (XAF)</Label><Input name="flat_value" type="number" min="1" step="1" defaultValue={offer?.flat_value ?? ""} required /></div>}
       <div className="grid gap-2 md:grid-cols-2 md:gap-3">
         <div className="grid gap-2"><Label>Minimum de commande (XAF)</Label><Input name="min_order_value" type="number" min="0" step="1" defaultValue={offer?.min_order_value ?? ""} /></div>
         <div className="grid gap-2"><Label>Réduction maximale (XAF)</Label><Input name="max_discount_value" type="number" min="0" step="1" defaultValue={offer?.max_discount_value ?? ""} /></div>
@@ -59,7 +70,9 @@ export function OfferForm({ offer, onDone }: { offer?: Offer; onDone?: () => voi
         <div className="grid gap-2"><Label>Fin</Label><Input name="ends_on" type="date" defaultValue={offer?.ends_on ?? ""} /></div>
       </div>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" defaultChecked={offer?.is_active ?? true} /> Offre active</label>
-      <Button type="submit">{offer ? "Enregistrer" : "Créer l'offre"}</Button>
+      {state.error && <p className="text-sm text-destructive">{state.error}</p>}
+      {!state.error && state.savedAt && <p className="text-sm text-muted-foreground">Offre enregistrée.</p>}
+      <Button type="submit" disabled={isPending}>{isPending ? "Enregistrement…" : offer ? "Enregistrer" : "Créer l’offre"}</Button>
     </form>
   );
 }

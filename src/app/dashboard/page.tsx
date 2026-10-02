@@ -2,6 +2,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { loadPlanAccess } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/currency";
 
@@ -12,8 +13,13 @@ export default async function DashboardOverviewPage() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const [{ count: pendingOrders }, { count: activeTables }, { data: todayOrders }, { data: recentOrders }] =
-    await Promise.all([
+  const [
+    { count: pendingOrders },
+    { count: activeTables },
+    { data: todayOrders },
+    { data: recentOrders },
+    access,
+  ] = await Promise.all([
       supabase
         .from("orders")
         .select("id", { count: "exact", head: true })
@@ -35,6 +41,7 @@ export default async function DashboardOverviewPage() {
         .eq("restaurant_id", restaurant.restaurantId)
         .order("created_at", { ascending: false })
         .limit(8),
+      loadPlanAccess(supabase, restaurant.restaurantId),
     ]);
 
   const todayRevenue = (todayOrders ?? [])
@@ -55,6 +62,31 @@ export default async function DashboardOverviewPage() {
         <h1 className="text-2xl font-semibold">Welcome back</h1>
         <p className="text-muted-foreground">{restaurant.restaurantName} — live overview</p>
       </div>
+
+      {access.isTrial && (
+        <div
+          className={
+            access.trialExpired
+              ? "rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm"
+              : "rounded-lg border bg-muted/40 p-4 text-sm"
+          }
+        >
+          {access.trialExpired ? (
+            <>
+              <p className="font-medium">Your free trial has ended.</p>
+              <p className="text-muted-foreground">
+                Premium templates and Business features are locked until you choose a plan. Contact
+                Servio to subscribe.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">{trialLabel(access.trialDaysLeft)}</p>
+              <p className="text-muted-foreground">You have every Business feature during the trial.</p>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
@@ -100,4 +132,10 @@ export default async function DashboardOverviewPage() {
       </Card>
     </div>
   );
+}
+
+function trialLabel(daysLeft: number | null): string {
+  if (daysLeft === null) return "Free trial";
+  if (daysLeft <= 1) return "Free trial: last day";
+  return `Free trial: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
 }
