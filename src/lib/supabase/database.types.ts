@@ -1636,8 +1636,32 @@ export type Database = {
       dearmor: { Args: { "": string }; Returns: string };
       gen_random_uuid: { Args: Record<PropertyKey, never>; Returns: string };
       gen_salt: { Args: { "": string }; Returns: string };
-      increment_coupon_usage: { Args: { p_coupon_id: string }; Returns: undefined };
+      mark_bill_paid: {
+        Args: {
+          p_bill_id: string;
+          p_branch_id?: string;
+          p_method: Database["public"]["Enums"]["payment_method"];
+          p_restaurant_id: string;
+          p_staff_id: string;
+        };
+        Returns: undefined;
+      };
       pgp_armor_headers: { Args: { "": string }; Returns: Record<string, unknown>[] };
+      place_order: {
+        Args: {
+          p_branch_slug: string;
+          p_coupon_code?: string;
+          p_customer_name?: string;
+          p_customer_phone?: string;
+          p_lines: Json;
+          p_restaurant_slug: string;
+          p_table_id?: string;
+        };
+        Returns: {
+          order_id: string;
+          order_number: number;
+        }[];
+      };
     };
     Enums: {
       bill_status: "open" | "requested" | "paid";

@@ -75,11 +75,13 @@ async function raiseBillForTable(
   tableId: string,
   restaurantId: string,
 ) {
+  // Any active session: a second bill request (or one made after ordering
+  // again) must still refresh the bill.
   const { data: session } = await admin
     .from("table_sessions")
     .select("id")
     .eq("table_id", tableId)
-    .eq("status", "open")
+    .neq("status", "closed")
     .maybeSingle();
 
   if (!session) return;

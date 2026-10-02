@@ -60,7 +60,7 @@ applied in filename order:
    staff, subscriptions, …)
 3. `..._rls_policies.sql` — Row Level Security: restaurant-level isolation
 4. `..._seed_reference_data.sql` — subscription plans and menu templates
-5. `..._coupon_usage_function.sql` — atomic coupon-redemption counter used by `placeOrder`
+5. `..._coupon_usage_function.sql` — coupon counter (superseded by `place_order`, dropped later)
 6. `..._storage_buckets.sql` — image buckets + storage RLS (per-restaurant folders)
 7. `..._mobile_money_payment.sql` — local Mobile Money payment method
 
@@ -162,11 +162,14 @@ the check), and near-real-time updates throughout.
 **Customer ordering loop** (`src/lib/cart-types.ts`,
 `src/components/menu/cart-provider.tsx`, `src/app/actions/orders.ts`): the
 cart is client-side (localStorage, scoped per restaurant+branch+table) purely
-for UX — every price is re-fetched from the database by ID and every coupon
-re-validated inside `placeOrder` before the order is written, so a tampered
-client request can't change what the restaurant gets paid. Placing an order
-creates or reuses the table's open `table_sessions` row, sets the table to
-`order_pending`, and redirects to a live tracking page.
+for UX. `placeOrder` hands the cart's IDs to the `place_order` database
+function (`supabase/migrations/..._transactional_orders.sql`), which prices
+every line, validates and counts the coupon, and writes the order in a single
+transaction — so a tampered client request can't change what the restaurant
+gets paid, and a failure leaves nothing half-written. Placing an order
+creates or reuses the table's active `table_sessions` row, sets the table to
+`order_pending`, and redirects to a live tracking page. Payment goes through
+`mark_bill_paid` the same way (one payment per bill, even on a double click).
 
 **Images** (`src/lib/compress-image.ts`, `src/components/ui/image-upload.tsx`):
 menu photos and restaurant logo/cover upload to Supabase Storage. Images are

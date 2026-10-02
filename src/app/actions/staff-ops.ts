@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Enums } from "@/lib/supabase/types";
 import { requireStaffSession } from "@/lib/staff-session";
+import { userFacingError } from "@/lib/supabase/errors";
 
 const KITCHEN_NEXT_STATUS: Partial<Record<Enums<"order_status">, Enums<"order_status">>> = {
   pending: "accepted",
@@ -210,74 +211,27 @@ export async function transferWaiterRequest(
   return { error: error?.message ?? null };
 }
 
-export async function markBillPaid(billId: string, method: "cash" | "mobile_money" | "card") {
+/**
+ * Cashier records payment. The `mark_bill_paid` database function does it
+ * in one transaction: charges what the session actually ordered, records
+ * the payment once (a double click gets "already paid"), completes the
+ * session's orders, closes the session and frees the table.
+ */
+export async function markBillPaid(
+  billId: string,
+  method: "cash" | "mobile_money" | "card",
+): Promise<{ error: string | null }> {
   const session = await requireStaffSession("cashier");
   const admin = createAdminClient();
 
-  const { data: bill } = await admin
-    .from("bills")
-    .select("id, total_amount, restaurant_id, table_session_id")
-    .eq("id", billId)
-    .eq("restaurant_id", session.restaurantId)
-    .single();
-
-  if (!bill) return;
-
-  await admin
-    .from("bills")
-    .update({ status: "paid", closed_at: new Date().toISOString() })
-    .eq("id", billId);
-
-  await admin.from("payments").insert({
-    restaurant_id: session.restaurantId,
-    bill_id: billId,
-    method,
-    status: "paid",
-    amount: bill.total_amount,
-    recorded_by_staff_id: session.staffId,
+  const { error } = await admin.rpc("mark_bill_paid", {
+    p_bill_id: billId,
+    p_restaurant_id: session.restaurantId,
+    p_staff_id: session.staffId,
+    p_method: method,
+    p_branch_id: session.branchId ?? undefined,
   });
 
-  if (bill.table_session_id) {
-    // Payment is the end of the lifecycle: everything still open on this
-    // table session becomes "completed", otherwise orders would linger as
-    // served/ready forever and skew the dashboard's pending count.
-    const { data: openOrders } = await admin
-      .from("orders")
-      .select("id")
-      .eq("table_session_id", bill.table_session_id)
-      .not("status", "in", "(completed,cancelled)");
-
-    if (openOrders && openOrders.length > 0) {
-      const ids = openOrders.map((o) => o.id);
-      await admin.from("orders").update({ status: "completed" }).in("id", ids);
-      await admin.from("order_status_history").insert(
-        ids.map((id) => ({
-          order_id: id,
-          status: "completed",
-          changed_by_staff_id: session.staffId,
-        })),
-      );
-    }
-
-    const { data: tableSession } = await admin
-      .from("table_sessions")
-      .select("table_id")
-      .eq("id", bill.table_session_id)
-      .maybeSingle();
-
-    await admin
-      .from("table_sessions")
-      .update({ status: "closed", closed_at: new Date().toISOString() })
-      .eq("id", bill.table_session_id);
-
-    // Free the table for the next guests.
-    if (tableSession?.table_id) {
-      await admin
-        .from("restaurant_tables")
-        .update({ status: "cleaning" })
-        .eq("id", tableSession.table_id);
-    }
-  }
-
   revalidatePath("/staff/cashier");
+  return { error: error ? userFacingError(error, "Could not record the payment.") : null };
 }
