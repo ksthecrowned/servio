@@ -13,7 +13,7 @@ const QUALITY = 0.82;
  */
 export async function compressImage(file: File): Promise<File> {
   if (!file.type.startsWith("image/")) {
-    throw new Error("Please choose an image file.");
+    throw new Error("Choisissez un fichier image.");
   }
 
   const bitmap = await createImageBitmap(file);
@@ -27,7 +27,7 @@ export async function compressImage(file: File): Promise<File> {
   canvas.height = height;
 
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not process the image in this browser.");
+  if (!ctx) throw new Error("Ce navigateur ne permet pas de traiter l’image.");
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
@@ -38,7 +38,7 @@ export async function compressImage(file: File): Promise<File> {
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, mime, QUALITY),
   );
-  if (!blob) throw new Error("Could not process the image.");
+  if (!blob) throw new Error("Impossible de traiter l’image.");
 
   return new File([blob], `image.${extension}`, { type: mime });
 }

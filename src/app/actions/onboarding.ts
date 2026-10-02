@@ -13,7 +13,7 @@ export async function createRestaurant(
   formData: FormData,
 ): Promise<OnboardingState> {
   const name = String(formData.get("name") ?? "").trim();
-  const branchName = String(formData.get("branchName") ?? "").trim() || "Main Branch";
+  const branchName = String(formData.get("branchName") ?? "").trim() || "Succursale principale";
   const cuisineType = String(formData.get("cuisineType") ?? "").trim() || null;
 
   if (!name) {

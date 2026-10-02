@@ -2,18 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { OFFER_TYPE_LABEL } from "@/lib/labels";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { createClient } from "@/lib/supabase/server";
 import { CouponManager } from "@/components/dashboard/coupon-manager";
 import { OfferForm } from "@/components/dashboard/offer-form";
 
-const typeLabels: Record<string, string> = {
-  percentage: "Pourcentage",
-  flat: "Montant fixe",
-  bogo: "1 acheté = 1 offert",
-  combo: "Combo",
-  happy_hour: "Happy hour",
-};
 
 export default async function OffersPage() {
   const restaurant = await requireCurrentRestaurant();
@@ -33,7 +27,7 @@ export default async function OffersPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Offres</h1>
-          <p className="text-muted-foreground">Créez des réductions en XAF, puis des codes promo que vos clients saisissent au moment de commander.</p>
+          <p className="text-muted-foreground">Créez des réductions en FCFA, puis des codes promo que vos clients saisissent au moment de commander.</p>
         </div>
         <Dialog>
           <DialogTrigger asChild><Button>Nouvelle offre</Button></DialogTrigger>
@@ -48,7 +42,7 @@ export default async function OffersPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-medium">{offer.name}</p>
-                  <p className="text-xs text-muted-foreground">{typeLabels[offer.type] ?? offer.type}</p>
+                  <p className="text-xs text-muted-foreground">{OFFER_TYPE_LABEL[offer.type]}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={offer.is_active ? "brand" : "outline"}>{offer.is_active ? "Active" : "Inactive"}</Badge>

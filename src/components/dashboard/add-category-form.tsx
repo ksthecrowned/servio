@@ -13,11 +13,11 @@ export function AddCategoryForm() {
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="categoryName">Category name</Label>
-        <Input id="categoryName" name="name" placeholder="Coffee" required className="w-48" />
+        <Label htmlFor="categoryName">Nom de la catégorie</Label>
+        <Input id="categoryName" name="name" placeholder="Grillades" required className="w-48" />
       </div>
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Adding…" : "Add category"}
+        {isPending ? "Ajout…" : "Ajouter la catégorie"}
       </Button>
       {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
     </form>

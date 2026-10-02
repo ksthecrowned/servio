@@ -108,7 +108,7 @@ export function EditMenuItemDialog({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`edit-price-${item.id}`}>Prix (XAF)</Label>
+              <Label htmlFor={`edit-price-${item.id}`}>Prix (FCFA)</Label>
               <Input
                 id={`edit-price-${item.id}`}
                 name="basePrice"

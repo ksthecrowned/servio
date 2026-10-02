@@ -74,6 +74,7 @@ applied in filename order:
 | `20261002000001_transactional_orders` | `place_order` and `mark_bill_paid`, each a single transaction |
 | `20261002000002_staff_login_throttle` | Staff PIN sign-in throttling |
 | `20261002000003_onboarding_trial` | Atomic `create_restaurant`, automatic 14-day trial, XAF plan prices |
+| `20261002000004_french_display_names` | French template names and default branch name |
 
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.

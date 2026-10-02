@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type OfferActionState = { error: string | null; savedAt?: number };
@@ -43,7 +44,7 @@ function readOffer(formData: FormData) {
     return { ok: false, error: "Indiquez un pourcentage entre 0 et 100." } as const;
   }
   if (type === "flat" && (flatValue === null || flatValue <= 0)) {
-    return { ok: false, error: "Indiquez un montant de réduction en XAF." } as const;
+    return { ok: false, error: "Indiquez un montant de réduction en FCFA." } as const;
   }
   if ((minOrderValue !== null && minOrderValue < 0) || (maxDiscountValue !== null && maxDiscountValue < 0)) {
     return { ok: false, error: "Les montants ne peuvent pas être négatifs." } as const;
@@ -84,7 +85,7 @@ export async function createOffer(
     .from("offers")
     .insert({ restaurant_id: restaurant.restaurantId, ...parsed.values });
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }
@@ -106,7 +107,7 @@ export async function updateOffer(
     .eq("id", id)
     .eq("restaurant_id", restaurant.restaurantId);
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }
@@ -152,7 +153,7 @@ export async function createCoupon(
   });
 
   if (error?.code === "23505") return { error: `Le code ${code} existe déjà.` };
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }
@@ -166,7 +167,7 @@ export async function setCouponActive(couponId: string, isActive: boolean): Prom
     .eq("id", couponId)
     .eq("restaurant_id", restaurant.restaurantId);
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
   revalidatePath("/dashboard/offers");
   return { error: null };
 }

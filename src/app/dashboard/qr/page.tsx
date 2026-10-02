@@ -34,10 +34,10 @@ export default async function QrPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">QR Codes</h1>
+        <h1 className="text-2xl font-semibold">QR codes</h1>
         <p className="text-muted-foreground">
-          Each table has its own QR. Guests open the menu only after scanning the code on their
-          table.
+          Chaque table a son propre QR code. Les clients ouvrent le menu en scannant le code posé sur
+          leur table.
         </p>
       </div>
 
@@ -51,7 +51,7 @@ export default async function QrPage() {
               {branch.tableQrs.map((table) => (
                 <div key={table.id} className="flex items-center gap-3 rounded-md border p-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={table.dataUrl} alt={`QR for ${table.label}`} className="size-16 rounded" />
+                  <img src={table.dataUrl} alt={`QR code de ${table.label}`} className="size-16 rounded" />
                   <div>
                     <p className="text-sm font-medium">{table.label}</p>
                     <p className="text-xs break-all text-muted-foreground">{table.url}</p>
@@ -59,14 +59,14 @@ export default async function QrPage() {
                 </div>
               ))}
               {branch.tableQrs.length === 0 && (
-                <p className="text-sm text-muted-foreground">No tables yet for this branch.</p>
+                <p className="text-sm text-muted-foreground">Aucune table pour cette succursale.</p>
               )}
             </div>
           </CardContent>
         </Card>
       ))}
       {(!branches || branches.length === 0) && (
-        <p className="text-sm text-muted-foreground">No branches yet.</p>
+        <p className="text-sm text-muted-foreground">Aucune succursale pour l’instant.</p>
       )}
     </div>
   );

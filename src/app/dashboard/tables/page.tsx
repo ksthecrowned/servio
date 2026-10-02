@@ -2,6 +2,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddTableForm } from "@/components/dashboard/add-table-form";
+import { TABLE_STATUS_LABEL } from "@/lib/labels";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,18 +37,18 @@ export default async function TablesPage() {
       <AutoRefresh intervalMs={8000} />
       <div>
         <h1 className="text-2xl font-semibold">Tables</h1>
-        <p className="text-muted-foreground">Manage tables across your branches.</p>
+        <p className="text-muted-foreground">Gérez les tables de vos succursales.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Add a table</CardTitle>
+          <CardTitle className="text-base">Ajouter une table</CardTitle>
         </CardHeader>
         <CardContent>
           {branches && branches.length > 0 ? (
             <AddTableForm branches={branches} />
           ) : (
-            <p className="text-sm text-muted-foreground">Create a branch first.</p>
+            <p className="text-sm text-muted-foreground">Créez d’abord une succursale.</p>
           )}
         </CardContent>
       </Card>
@@ -63,13 +64,13 @@ export default async function TablesPage() {
                 </p>
               </div>
               <Badge variant={STATUS_VARIANT[table.status] ?? "secondary"}>
-                {table.status.replace("_", " ")}
+                {TABLE_STATUS_LABEL[table.status]}
               </Badge>
             </CardContent>
           </Card>
         ))}
         {(!tables || tables.length === 0) && (
-          <p className="text-sm text-muted-foreground">No tables yet.</p>
+          <p className="text-sm text-muted-foreground">Aucune table pour l’instant.</p>
         )}
       </div>
     </div>

@@ -3,6 +3,7 @@ import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { signOutOwner } from "@/app/actions/auth";
+import { ROLE_LABEL } from "@/lib/labels";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const restaurant = await requireCurrentRestaurant();
@@ -16,10 +17,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
         <div className="border-t pt-4">
           <p className="truncate px-3 text-sm font-medium">{restaurant.restaurantName}</p>
-          <p className="px-3 text-xs text-muted-foreground capitalize">{restaurant.role}</p>
+          <p className="px-3 text-xs text-muted-foreground">{ROLE_LABEL[restaurant.role]}</p>
           <form action={signOutOwner} className="mt-2 px-3">
             <Button type="submit" variant="ghost" size="sm" className="w-full justify-start px-0">
-              Sign out
+              Se déconnecter
             </Button>
           </form>
         </div>

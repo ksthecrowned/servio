@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type TableActionState = { error: string | null };
@@ -15,7 +16,7 @@ export async function addTable(
   const label = String(formData.get("label") ?? "").trim();
 
   if (!branchId || !label) {
-    return { error: "Branch and table label are required." };
+    return { error: "La succursale et le nom de la table sont obligatoires." };
   }
 
   await requireCurrentRestaurant();
@@ -23,8 +24,11 @@ export async function addTable(
 
   const { error } = await supabase.from("restaurant_tables").insert({ branch_id: branchId, label });
 
+  if (error?.code === "23505") {
+    return { error: `Une table « ${label} » existe déjà dans cette succursale.` };
+  }
   if (error) {
-    return { error: error.message };
+    return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
   }
 
   revalidatePath("/dashboard/tables");

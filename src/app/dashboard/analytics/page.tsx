@@ -94,9 +94,9 @@ export default async function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Analytics</h1>
+        <h1 className="text-2xl font-semibold">Statistiques</h1>
         <p className="text-muted-foreground">
-          Revenue, orders, and dishes from {restaurant.restaurantName}.
+          Chiffre d’affaires, commandes et plats de {restaurant.restaurantName}.
         </p>
       </div>
 
@@ -107,34 +107,34 @@ export default async function AnalyticsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Revenue</CardTitle>
+            <CardTitle className="text-base">Chiffre d’affaires</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Stat label="Today" value={formatCurrency(revenueSince(todayMs))} />
-            <Stat label="Last 7 days" value={formatCurrency(revenueSince(weekMs))} />
-            <Stat label="Last 30 days" value={formatCurrency(revenueSince(monthMs))} />
+            <Stat label="Aujourd’hui" value={formatCurrency(revenueSince(todayMs))} />
+            <Stat label="7 derniers jours" value={formatCurrency(revenueSince(weekMs))} />
+            <Stat label="30 derniers jours" value={formatCurrency(revenueSince(monthMs))} />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Orders</CardTitle>
+            <CardTitle className="text-base">Commandes</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Stat label="Total" value={String(rows.length)} />
-            <Stat label="Completed" value={String(statusCount("completed"))} />
-            <Stat label="Cancelled" value={String(statusCount("cancelled"))} />
-            <Stat label="Pending" value={String(statusCount("pending"))} />
+            <Stat label="Terminées" value={String(statusCount("completed"))} />
+            <Stat label="Annulées" value={String(statusCount("cancelled"))} />
+            <Stat label="En attente" value={String(statusCount("pending"))} />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Products</CardTitle>
+            <CardTitle className="text-base">Plats les plus vendus</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {ranked.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No dishes sold yet.</p>
+              <p className="text-sm text-muted-foreground">Aucun plat vendu pour l’instant.</p>
             ) : (
               ranked.slice(0, 5).map(([name, quantity]) => (
                 <Stat key={name} label={name} value={String(quantity)} />
@@ -145,30 +145,30 @@ export default async function AnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Customers</CardTitle>
+            <CardTitle className="text-base">Clients</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Stat label="Registered" value={String(customerCount ?? 0)} />
-            <Stat label="First order" value={String(firstTime)} />
-            <Stat label="Returning" value={String(returning)} />
+            <Stat label="Enregistrés" value={String(customerCount ?? 0)} />
+            <Stat label="Première commande" value={String(firstTime)} />
+            <Stat label="Clients fidèles" value={String(returning)} />
           </CardContent>
         </Card>
 
         <Card className="sm:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">Offers</CardTitle>
+            <CardTitle className="text-base">Offres</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Stat label="Discount given" value={formatCurrency(discountGiven)} />
-            <Stat label="Revenue with a coupon" value={formatCurrency(couponRevenue)} />
+            <Stat label="Réductions accordées" value={formatCurrency(discountGiven)} />
+            <Stat label="Chiffre d’affaires avec code promo" value={formatCurrency(couponRevenue)} />
             {couponRows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No coupons yet.</p>
+              <p className="text-sm text-muted-foreground">Aucun code promo pour l’instant.</p>
             ) : (
               couponRows.map((coupon) => (
                 <Stat
                   key={coupon.code}
                   label={coupon.offers?.name ? `${coupon.code} · ${coupon.offers.name}` : coupon.code}
-                  value={`${coupon.times_used} used`}
+                  value={`${coupon.times_used} utilisation${coupon.times_used > 1 ? "s" : ""}`}
                 />
               ))
             )}

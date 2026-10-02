@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type SettingsActionState = { error: string | null; success: boolean };
@@ -19,7 +20,13 @@ export async function updateRestaurantProfile(
   const logoUrl = String(formData.get("logoUrl") ?? "").trim() || null;
   const coverImageUrl = String(formData.get("coverImageUrl") ?? "").trim() || null;
   if (!name) {
-    return { error: "Restaurant name is required.", success: false };
+    return { error: "Indiquez le nom du restaurant.", success: false };
+  }
+
+  for (const percent of [taxPercent, serviceChargePercent]) {
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      return { error: "La taxe et les frais de service doivent être compris entre 0 et 100 %.", success: false };
+    }
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -39,7 +46,7 @@ export async function updateRestaurantProfile(
     .eq("id", restaurant.restaurantId);
 
   if (error) {
-    return { error: error.message, success: false };
+    return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), success: false };
   }
 
   revalidatePath("/dashboard/settings");

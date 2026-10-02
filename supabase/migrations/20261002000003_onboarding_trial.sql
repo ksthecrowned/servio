@@ -106,7 +106,7 @@ begin
   values (v_restaurant_id, v_user_id, 'owner');
 
   insert into branches (restaurant_id, slug, name)
-  values (v_restaurant_id, 'main', coalesce(nullif(btrim(p_branch_name), ''), 'Main Branch'));
+  values (v_restaurant_id, 'main', coalesce(nullif(btrim(p_branch_name), ''), 'Succursale principale'));
 
   return v_restaurant_id;
 end;

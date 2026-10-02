@@ -13,24 +13,24 @@ export function AddStaffForm({ branches }: { branches: { id: string; name: strin
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="staffName">Name</Label>
-        <Input id="staffName" name="name" placeholder="Priya" required className="w-40" />
+        <Label htmlFor="staffName">Nom</Label>
+        <Input id="staffName" name="name" placeholder="Grâce" required className="w-40" />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="role">Role</Label>
+        <Label htmlFor="role">Rôle</Label>
         <select
           id="role"
           name="role"
           required
           className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
         >
-          <option value="waiter">Waiter</option>
-          <option value="kitchen">Kitchen</option>
-          <option value="cashier">Cashier</option>
+          <option value="waiter">Serveur</option>
+          <option value="kitchen">Cuisine</option>
+          <option value="cashier">Caisse</option>
         </select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="branchId">Branch</Label>
+        <Label htmlFor="branchId">Succursale</Label>
         <select
           id="branchId"
           name="branchId"
@@ -50,7 +50,7 @@ export function AddStaffForm({ branches }: { branches: { id: string; name: strin
           name="pin"
           type="password"
           inputMode="numeric"
-          placeholder="4 digits"
+          placeholder="4 chiffres"
           pattern="\d{4}"
           minLength={4}
           maxLength={4}
@@ -59,7 +59,7 @@ export function AddStaffForm({ branches }: { branches: { id: string; name: strin
         />
       </div>
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Adding…" : "Add staff"}
+        {isPending ? "Ajout…" : "Ajouter"}
       </Button>
       {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
     </form>

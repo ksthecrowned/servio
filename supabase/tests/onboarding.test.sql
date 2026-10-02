@@ -43,7 +43,7 @@ begin
   assert (select name from restaurants where id = v_id) = 'Chez A', 'name not trimmed';
   assert (select owner_id from restaurants where id = v_id) = '00000000-0000-0000-0000-00000000000a';
   assert (select role from restaurant_members where restaurant_id = v_id) = 'owner', 'owner membership missing';
-  assert (select name from branches where restaurant_id = v_id and slug = 'main') = 'Main Branch', 'default branch missing';
+  assert (select name from branches where restaurant_id = v_id and slug = 'main') = 'Succursale principale', 'default branch missing';
 
   -- The owner can read (but not write) their subscription.
   select s.status, s.trial_ends_at, p.tier into v_sub

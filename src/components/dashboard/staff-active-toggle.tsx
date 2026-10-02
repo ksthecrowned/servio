@@ -23,7 +23,7 @@ export function StaffActiveToggle({ staffId, isActive }: { staffId: string; isAc
           })
         }
       >
-        {isPending ? "Saving…" : isActive ? "Deactivate" : "Reactivate"}
+        {isPending ? "Enregistrement…" : isActive ? "Désactiver" : "Réactiver"}
       </Button>
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>

@@ -46,28 +46,28 @@ export function RestaurantSettingsForm({
             value={logoUrl}
             onChange={setLogoUrl}
             prefix="logo"
-            label="Upload logo"
+            label="Ajouter un logo"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label>Cover image</Label>
+          <Label>Image de couverture</Label>
           <ImageUpload
             bucket="restaurant-branding"
             restaurantId={restaurantId}
             value={coverUrl}
             onChange={setCoverUrl}
             prefix="cover"
-            label="Upload cover"
+            label="Ajouter une couverture"
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Restaurant name</Label>
+        <Label htmlFor="name">Nom du restaurant</Label>
         <Input id="name" name="name" defaultValue={restaurant.name} required />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="phone">Phone</Label>
+        <Label htmlFor="phone">Téléphone</Label>
         <Input id="phone" name="phone" defaultValue={restaurant.phone ?? ""} />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -76,7 +76,7 @@ export function RestaurantSettingsForm({
       </div>
       <div className="flex gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="taxPercent">Tax %</Label>
+          <Label htmlFor="taxPercent">Taxe (%)</Label>
           <Input
             id="taxPercent"
             name="taxPercent"
@@ -88,7 +88,7 @@ export function RestaurantSettingsForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="serviceChargePercent">Service charge %</Label>
+          <Label htmlFor="serviceChargePercent">Frais de service (%)</Label>
           <Input
             id="serviceChargePercent"
             name="serviceChargePercent"
@@ -102,9 +102,9 @@ export function RestaurantSettingsForm({
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-      {state.success ? <p className="text-sm text-brand">Saved.</p> : null}
+      {state.success ? <p className="text-sm text-brand">Enregistré.</p> : null}
       <Button type="submit" disabled={isPending} className="w-fit">
-        {isPending ? "Saving…" : "Save changes"}
+        {isPending ? "Enregistrement…" : "Enregistrer"}
       </Button>
     </form>
   );

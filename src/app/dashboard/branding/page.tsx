@@ -44,9 +44,9 @@ export default async function BrandingPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Branding</h1>
+          <h1 className="text-2xl font-semibold">Apparence</h1>
           <p className="text-muted-foreground">
-            Change how your QR menu looks. Your menu items and prices stay exactly as they are.
+            Changez l’apparence de votre menu QR. Vos plats et vos prix restent exactement les mêmes.
           </p>
         </div>
         {branch && previewTable ? (
@@ -55,16 +55,16 @@ export default async function BrandingPage() {
             target="_blank"
             className="text-sm underline underline-offset-4"
           >
-            Preview live menu →
+            Voir le menu en ligne →
           </Link>
         ) : null}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Template & colours</CardTitle>
+          <CardTitle className="text-base">Modèle et couleurs</CardTitle>
           <CardDescription>
-            Switching template never changes your menu data — only its presentation.
+            Changer de modèle ne modifie jamais le contenu du menu, seulement sa présentation.
           </CardDescription>
         </CardHeader>
         <CardContent>

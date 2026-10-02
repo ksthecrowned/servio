@@ -27,7 +27,7 @@ export function CreateRestaurantForm() {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="branchName">First branch name</Label>
-            <Input id="branchName" name="branchName" placeholder="Main Branch" />
+            <Input id="branchName" name="branchName" placeholder="Succursale principale" />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cuisineType">Cuisine type</Label>

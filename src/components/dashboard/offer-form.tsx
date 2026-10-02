@@ -5,6 +5,7 @@ import { createOffer, updateOffer } from "@/app/actions/offers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OFFER_TYPE_LABEL } from "@/lib/labels";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Offer = {
@@ -20,13 +21,6 @@ type Offer = {
   is_active: boolean;
 };
 
-const typeLabels: Record<string, string> = {
-  percentage: "Pourcentage",
-  flat: "Montant fixe",
-  bogo: "1 acheté = 1 offert",
-  combo: "Combo",
-  happy_hour: "Happy hour",
-};
 
 /** Types guests can redeem at checkout today (see place_order). */
 const ORDERABLE_TYPES = ["percentage", "flat"];
@@ -36,7 +30,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
   const [state, formAction, isPending] = useActionState(offer ? updateOffer : createOffer, { error: null });
   // An existing offer of a legacy type stays editable, but new offers only
   // offer the types that can actually be priced.
-  const typeOptions = Object.entries(typeLabels).filter(
+  const typeOptions = Object.entries(OFFER_TYPE_LABEL).filter(
     ([value]) => ORDERABLE_TYPES.includes(value) || value === offer?.type,
   );
 
@@ -60,10 +54,10 @@ export function OfferForm({ offer }: { offer?: Offer }) {
         )}
       </div>
       {type === "percentage" && <div className="grid gap-2"><Label>Réduction (%)</Label><Input name="percentage_value" type="number" min="0.01" max="100" step="0.01" defaultValue={offer?.percentage_value ?? ""} required /></div>}
-      {type === "flat" && <div className="grid gap-2"><Label>Réduction (XAF)</Label><Input name="flat_value" type="number" min="1" step="1" defaultValue={offer?.flat_value ?? ""} required /></div>}
+      {type === "flat" && <div className="grid gap-2"><Label>Réduction (FCFA)</Label><Input name="flat_value" type="number" min="1" step="1" defaultValue={offer?.flat_value ?? ""} required /></div>}
       <div className="grid gap-2 md:grid-cols-2 md:gap-3">
-        <div className="grid gap-2"><Label>Minimum de commande (XAF)</Label><Input name="min_order_value" type="number" min="0" step="1" defaultValue={offer?.min_order_value ?? ""} /></div>
-        <div className="grid gap-2"><Label>Réduction maximale (XAF)</Label><Input name="max_discount_value" type="number" min="0" step="1" defaultValue={offer?.max_discount_value ?? ""} /></div>
+        <div className="grid gap-2"><Label>Minimum de commande (FCFA)</Label><Input name="min_order_value" type="number" min="0" step="1" defaultValue={offer?.min_order_value ?? ""} /></div>
+        <div className="grid gap-2"><Label>Réduction maximale (FCFA)</Label><Input name="max_discount_value" type="number" min="0" step="1" defaultValue={offer?.max_discount_value ?? ""} /></div>
       </div>
       <div className="grid gap-2 md:grid-cols-2 md:gap-3">
         <div className="grid gap-2"><Label>Début</Label><Input name="starts_on" type="date" defaultValue={offer?.starts_on ?? ""} /></div>
