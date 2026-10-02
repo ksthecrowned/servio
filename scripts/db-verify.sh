@@ -28,7 +28,7 @@ done
 
 for test in "$root"/supabase/tests/*.test.sql; do
   echo "test     $(basename "$test")"
-  psql "$target" "${psql_opts[@]}" -f "$test"
+  psql "$target" "${psql_opts[@]}" -o /dev/null -f "$test"
 done
 
 echo "ok"

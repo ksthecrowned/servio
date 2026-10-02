@@ -42,3 +42,12 @@ create table storage.objects (
 alter table storage.objects enable row level security;
 
 grant usage on schema auth, storage to anon, authenticated, service_role;
+
+-- Supabase's default privileges: the API roles get table, sequence and
+-- function privileges on everything created in public (RLS and explicit
+-- revokes then narrow them). Reproducing this keeps the privilege
+-- assertions in the tests meaningful.
+grant usage on schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
