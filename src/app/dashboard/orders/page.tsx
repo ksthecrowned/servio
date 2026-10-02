@@ -1,4 +1,5 @@
 import { AutoRefresh } from "@/components/auto-refresh";
+import { CancelOrderControl } from "@/components/orders/cancel-order-control";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
@@ -12,7 +13,7 @@ export default async function OrdersPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, order_number, status, total_amount, created_at, branches!orders_branch_id_fkey(name)")
+    .select("id, order_number, status, total_amount, created_at, cancel_reason, branches!orders_branch_id_fkey(name)")
     .eq("restaurant_id", restaurant.restaurantId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -31,17 +32,29 @@ export default async function OrdersPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {(orders ?? []).map((order) => (
-            <div key={order.id} className="flex items-center justify-between border-b py-2 last:border-0">
-              <div>
-                <p className="font-medium">Commande n° {order.order_number}</p>
-                <p className="text-xs text-muted-foreground">
-                  {(order.branches as unknown as { name: string } | null)?.name}
-                </p>
+            <div key={order.id} className="flex flex-col gap-2 border-b py-2 last:border-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Commande n° {order.order_number}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {order.branches?.name}
+                    {order.status === "cancelled" && order.cancel_reason ? ` · ${order.cancel_reason}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={order.status === "cancelled" ? "font-medium text-muted-foreground line-through" : "font-medium"}>
+                    {formatCurrency(order.total_amount)}
+                  </span>
+                  <Badge variant={order.status === "cancelled" ? "outline" : "default"}>
+                    {ORDER_STATUS_LABEL[order.status]}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-medium">{formatCurrency(order.total_amount)}</span>
-                <Badge>{ORDER_STATUS_LABEL[order.status]}</Badge>
-              </div>
+              {["pending", "accepted", "preparing", "ready"].includes(order.status) ? (
+                <div className="self-end">
+                  <CancelOrderControl orderId={order.id} as="owner" />
+                </div>
+              ) : null}
             </div>
           ))}
           {(!orders || orders.length === 0) && (

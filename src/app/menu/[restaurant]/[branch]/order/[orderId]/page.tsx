@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/currency";
 
 import { AutoRefresh } from "@/components/auto-refresh";
 import { FeedbackForm } from "@/components/menu/feedback-form";
+import { GuestCancelOrder } from "@/components/menu/guest-cancel-order";
 import { OrderStatusStepper } from "@/components/menu/order-status-stepper";
 import { Badge } from "@/components/ui/badge";
 import { ORDER_STATUS_LABEL } from "@/lib/labels";
@@ -22,7 +23,7 @@ export default async function OrderTrackingPage(
   const { data: order } = await admin
     .from("orders")
     .select(
-      `id, order_number, status, subtotal, discount_amount, tax_amount, service_charge_amount, total_amount, created_at,
+      `id, order_number, status, cancel_reason, subtotal, discount_amount, tax_amount, service_charge_amount, total_amount, created_at,
        restaurants!inner(name, slug), branches!orders_branch_id_fkey!inner(name, slug),
        table_sessions!orders_table_session_id_fkey(table_id),
        order_items(id, item_name, variant_name, unit_price, quantity, addon_selection)`,
@@ -71,7 +72,14 @@ export default async function OrderTrackingPage(
 
       <div className="rounded-lg border p-4">
         <OrderStatusStepper status={order.status} />
+        {order.status === "cancelled" && order.cancel_reason ? (
+          <p className="mt-1 text-sm text-muted-foreground">Motif : {order.cancel_reason}</p>
+        ) : null}
       </div>
+
+      {order.status === "pending" ? (
+        <GuestCancelOrder orderId={order.id} restaurantSlug={restaurantSlug} branchSlug={branchSlug} />
+      ) : null}
 
       <div className="flex flex-col gap-2 rounded-lg border p-4">
         <h2 className="font-medium">Articles</h2>
