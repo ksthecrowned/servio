@@ -251,10 +251,7 @@ export async function transferWaiterRequest(
  * the payment once (a double click gets "already paid"), completes the
  * session's orders, closes the session and frees the table.
  */
-export async function markBillPaid(
-  billId: string,
-  method: "cash" | "mobile_money" | "card",
-): Promise<{ error: string | null }> {
+export async function markBillPaid(billId: string): Promise<{ error: string | null }> {
   const session = await requireStaffSession("cashier");
   const admin = createAdminClient();
 
@@ -262,7 +259,9 @@ export async function markBillPaid(
     p_bill_id: billId,
     p_restaurant_id: session.restaurantId,
     p_staff_id: session.staffId,
-    p_method: method,
+    // Cash only for now; mark_bill_paid also accepts mobile_money and card
+    // for when a payment provider is connected.
+    p_method: "cash",
     p_branch_id: session.branchId ?? undefined,
   });
 
