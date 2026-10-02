@@ -31,4 +31,16 @@ for test in "$root"/supabase/tests/*.test.sql; do
   psql "$target" "${psql_opts[@]}" -o /dev/null -f "$test"
 done
 
+# Concurrency tests need several connections and committed data, so they run
+# on a throwaway copy of the verified database.
+scratch="${DATABASE_URL%/*}/servio_verify_concurrency"
+for test in "$root"/supabase/tests/*.concurrent.sh; do
+  echo "test     $(basename "$test")"
+  psql "$DATABASE_URL" "${psql_opts[@]}" \
+    -c "drop database if exists servio_verify_concurrency" \
+    -c "create database servio_verify_concurrency template servio_verify"
+  "$test" "$scratch"
+  psql "$DATABASE_URL" "${psql_opts[@]}" -c "drop database servio_verify_concurrency"
+done
+
 echo "ok"

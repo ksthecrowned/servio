@@ -303,16 +303,23 @@ begin
     raise exception 'Mode de paiement invalide.';
   end if;
 
-  -- Row lock: a double click or two cashiers cannot both record a payment.
-  select * into v_bill
-  from bills
-  where id = p_bill_id
-    and restaurant_id = p_restaurant_id
-    and (p_branch_id is null or branch_id = p_branch_id)
-  for update;
+  -- Lock order: table, then bill — the same order as place_order, which
+  -- locks the table and then updates the session's bill. The opposite order
+  -- deadlocks a guest ordering while the cashier pays. Waiting on the table
+  -- also means an order being placed is committed, and charged, first.
+  select ts.table_id into v_table_id
+  from bills b
+  join table_sessions ts on ts.id = b.table_session_id
+  where b.id = p_bill_id
+    and b.restaurant_id = p_restaurant_id
+    and (p_branch_id is null or b.branch_id = p_branch_id);
   if not found then
     raise exception 'Addition introuvable.';
   end if;
+  perform 1 from restaurant_tables where id = v_table_id for update;
+
+  -- Row lock: a double click or two cashiers cannot both record a payment.
+  select * into v_bill from bills where id = p_bill_id for update;
   if v_bill.status = 'paid' then
     raise exception 'Cette addition a déjà été réglée.';
   end if;
