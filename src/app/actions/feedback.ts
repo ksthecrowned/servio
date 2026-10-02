@@ -24,7 +24,7 @@ export async function submitFeedback(formData: FormData) {
   const admin = createAdminClient();
   const { data: order } = await admin
     .from("orders")
-    .select("id, status, restaurant_id, restaurants!inner(slug), branches!inner(slug)")
+    .select("id, status, restaurant_id, restaurants!inner(slug), branches!orders_branch_id_fkey!inner(slug)")
     .eq("id", orderId)
     .eq("restaurants.slug", restaurantSlug)
     .eq("branches.slug", branchSlug)
