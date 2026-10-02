@@ -17,7 +17,12 @@ export type StaffActionState = { error: string | null };
  * here would create accounts that can be made but never signed into. Managers
  * get a real email/password account instead.
  */
-const VALID_ROLES = ["waiter", "kitchen", "cashier"];
+const VALID_ROLES = ["waiter", "kitchen", "cashier"] as const;
+type StaffRole = (typeof VALID_ROLES)[number];
+
+function isStaffRole(value: string): value is StaffRole {
+  return (VALID_ROLES as readonly string[]).includes(value);
+}
 
 export async function addStaff(
   _prevState: StaffActionState,
@@ -29,7 +34,7 @@ export async function addStaff(
   const pin = String(formData.get("pin") ?? "");
 
   if (!name) return { error: "Name is required." };
-  if (!VALID_ROLES.includes(role)) return { error: "Choose a valid role." };
+  if (!isStaffRole(role)) return { error: "Choose a valid role." };
 
   // Exactly 4 digits: the staff login keypad (PRD section 7's ● ● ● ●) is a
   // fixed 4-dot pad, so a longer PIN would be impossible to type in.

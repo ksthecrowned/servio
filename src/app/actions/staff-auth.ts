@@ -9,11 +9,17 @@ import { verifyPin } from "@/lib/staff-pin";
 
 export type StaffLoginState = { error: string | null };
 
-const ROLE_HOME: Record<string, string> = {
+type StaffRole = "waiter" | "kitchen" | "cashier";
+
+const ROLE_HOME: Record<StaffRole, string> = {
   waiter: "/staff/waiter",
   kitchen: "/staff/kitchen",
   cashier: "/staff/cashier",
 };
+
+function isStaffRole(value: string): value is StaffRole {
+  return Object.hasOwn(ROLE_HOME, value);
+}
 
 /**
  * Resolves a restaurant code to its display name, so the sign-in screen can
@@ -48,7 +54,7 @@ export async function staffLogin(
   const pin = String(formData.get("pin") ?? "");
 
   if (!restaurantSlug) return { error: "Enter your restaurant code." };
-  if (!ROLE_HOME[role]) return { error: "Choose your role." };
+  if (!isStaffRole(role)) return { error: "Choose your role." };
   if (!/^\d{4}$/.test(pin)) return { error: "Enter your 4-digit PIN." };
 
   const admin = createAdminClient();
@@ -88,7 +94,7 @@ export async function staffLogin(
       staffId: match.id,
       restaurantId: restaurant.id,
       branchId: match.branch_id,
-      role: role as "waiter" | "kitchen" | "cashier",
+      role,
       name: match.name,
     }),
     { httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: 60 * 60 * 12 },

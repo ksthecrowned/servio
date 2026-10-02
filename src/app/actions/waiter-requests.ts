@@ -2,7 +2,12 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const VALID_TYPES = ["call_waiter", "water", "cutlery", "bill", "other"];
+const VALID_TYPES = ["call_waiter", "water", "cutlery", "bill", "other"] as const;
+type WaiterRequestType = (typeof VALID_TYPES)[number];
+
+function isWaiterRequestType(value: string): value is WaiterRequestType {
+  return (VALID_TYPES as readonly string[]).includes(value);
+}
 
 export async function requestWaiterAssistance(
   branchId: string,
@@ -10,7 +15,7 @@ export async function requestWaiterAssistance(
   type: string,
   note?: string,
 ): Promise<{ error: string | null }> {
-  if (!VALID_TYPES.includes(type)) {
+  if (!isWaiterRequestType(type)) {
     return { error: "Invalid request type." };
   }
 

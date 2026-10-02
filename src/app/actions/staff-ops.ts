@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Enums } from "@/lib/supabase/types";
 import { requireStaffSession } from "@/lib/staff-session";
 
-const KITCHEN_NEXT_STATUS: Record<string, string> = {
+const KITCHEN_NEXT_STATUS: Partial<Record<Enums<"order_status">, Enums<"order_status">>> = {
   pending: "accepted",
   accepted: "preparing",
   preparing: "ready",

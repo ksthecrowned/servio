@@ -7,6 +7,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const OFFER_TYPES = ["percentage", "flat", "bogo", "combo", "happy_hour"] as const;
 type OfferType = (typeof OFFER_TYPES)[number];
 
+function isOfferType(value: string): value is OfferType {
+  return (OFFER_TYPES as readonly string[]).includes(value);
+}
+
 function nullableNumber(value: FormDataEntryValue | null) {
   if (typeof value !== "string" || !value.trim()) return null;
   const parsed = Number(value);
@@ -17,7 +21,7 @@ export async function createOffer(formData: FormData) {
   const restaurant = await requireCurrentRestaurant();
   const name = String(formData.get("name") ?? "").trim();
   const type = String(formData.get("type") ?? "");
-  if (!name || !OFFER_TYPES.includes(type as OfferType)) {
+  if (!name || !isOfferType(type)) {
     throw new Error("Invalid offer.");
   }
 
@@ -44,7 +48,7 @@ export async function updateOffer(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const type = String(formData.get("type") ?? "");
-  if (!id || !name || !OFFER_TYPES.includes(type as OfferType)) {
+  if (!id || !name || !isOfferType(type)) {
     throw new Error("Invalid offer.");
   }
 
