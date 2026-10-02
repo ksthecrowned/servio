@@ -1,4 +1,3 @@
-import { formatCurrency } from "@/lib/currency";
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
