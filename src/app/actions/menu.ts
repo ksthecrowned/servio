@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type MenuActionState = {
@@ -16,7 +17,7 @@ export async function addMenuCategory(
   formData: FormData,
 ): Promise<MenuActionState> {
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "Category name is required." };
+  if (!name) return { error: "Indiquez le nom de la catégorie." };
 
   const restaurant = await requireCurrentRestaurant();
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export async function addMenuCategory(
     .from("menu_categories")
     .insert({ restaurant_id: restaurant.restaurantId, name });
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
 
   revalidatePath("/dashboard/menu");
   return { error: null };
@@ -44,7 +45,7 @@ export async function addMenuItem(
   const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
 
   if (!categoryId || !name || Number.isNaN(basePrice)) {
-    return { error: "Category, name and price are required." };
+    return { error: "La catégorie, le nom et le prix sont obligatoires." };
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -57,7 +58,7 @@ export async function addMenuItem(
     .eq("restaurant_id", restaurant.restaurantId)
     .maybeSingle();
 
-  if (!category) return { error: "Invalid category." };
+  if (!category) return { error: "Catégorie introuvable." };
 
   const { error } = await supabase.from("menu_items").insert({
     restaurant_id: restaurant.restaurantId,
@@ -70,7 +71,7 @@ export async function addMenuItem(
     image_url: imageUrl,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
 
   revalidatePath("/dashboard/menu");
   return { error: null, savedAt: Date.now() };
@@ -91,7 +92,7 @@ export async function updateMenuItem(
   const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
 
   if (!itemId || !categoryId || !name || Number.isNaN(basePrice) || basePrice < 0) {
-    return { error: "Category, name and a valid price are required." };
+    return { error: "La catégorie, le nom et un prix valide sont obligatoires." };
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -104,7 +105,7 @@ export async function updateMenuItem(
     .eq("restaurant_id", restaurant.restaurantId)
     .maybeSingle();
 
-  if (!category) return { error: "Invalid category." };
+  if (!category) return { error: "Catégorie introuvable." };
 
   const { error } = await supabase
     .from("menu_items")
@@ -121,7 +122,7 @@ export async function updateMenuItem(
     .eq("id", itemId)
     .eq("restaurant_id", restaurant.restaurantId);
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
 
   revalidatePath("/dashboard/menu");
   return { error: null, savedAt: Date.now() };

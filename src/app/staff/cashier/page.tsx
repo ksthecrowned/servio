@@ -1,5 +1,8 @@
 import { AutoRefresh } from "@/components/auto-refresh";
 import { BillCard } from "@/components/staff/bill-card";
+import { StaffAlerts } from "@/components/staff/staff-alerts";
+import { formatCurrency } from "@/lib/currency";
+import type { StaffAlert } from "@/lib/staff-alerts";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireStaffSession } from "@/lib/staff-session";
@@ -29,26 +32,36 @@ export default async function CashierPage() {
     return { id: bill.id, total_amount: bill.total_amount, tableLabel, paymentQrDataUrl: null };
   });
 
+  // Every bill waiting for payment rings the cashier once (1 beep).
+  const alerts: StaffAlert[] = cards.map((bill) => ({
+    key: `bill:${bill.id}`,
+    kind: "bill",
+    title: `Addition demandée — Table ${bill.tableLabel}`,
+    body: formatCurrency(bill.total_amount),
+  }));
+
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-muted/20 p-4 sm:p-6">
       <AutoRefresh intervalMs={5000} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Cashier</h1>
+          <h1 className="text-2xl font-semibold">Caisse</h1>
           <p className="text-muted-foreground">{session.name}</p>
         </div>
         <form action={staffLogout}>
           <Button type="submit" variant="outline">
-            Sign out
+            Quitter
           </Button>
         </form>
       </div>
+
+      <StaffAlerts staffId={session.staffId} alerts={alerts} screenName="Caisse" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((bill) => (
           <BillCard key={bill.id} bill={bill} />
         ))}
-        {cards.length === 0 && <p className="text-sm text-muted-foreground">No open bills.</p>}
+        {cards.length === 0 && <p className="text-sm text-muted-foreground">Aucune addition en attente.</p>}
       </div>
     </div>
   );

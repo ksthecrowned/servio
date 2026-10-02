@@ -1065,3 +1065,499 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+/* ---------------------------------------------------------------------------
+   Ordering: dish options, cart bar, cart screen, table orders
+   --------------------------------------------------------------------------- */
+
+.guest-app .order-panel {
+  margin-top: 8px;
+}
+
+.guest-app .order-panel .choice-list {
+  margin: 10px 0 0;
+}
+
+.guest-app .choice-list button small {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.guest-app .radio.square {
+  border-radius: 5px;
+}
+
+.guest-app .field-label textarea.compact {
+  min-height: 72px;
+  font-weight: 400;
+}
+
+.guest-app .add-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.guest-app .qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+}
+
+.guest-app .qty-stepper button {
+  width: 44px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+}
+
+.guest-app .qty-stepper button:disabled {
+  opacity: 0.35;
+}
+
+.guest-app .qty-stepper span {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 750;
+}
+
+.guest-app .cart-line-actions .qty-stepper {
+  height: 38px;
+}
+
+.guest-app .cart-line-actions .qty-stepper button {
+  width: 36px;
+}
+
+.guest-app .cart-bar-spacer {
+  height: 72px;
+}
+
+.guest-app .cart-bar {
+  position: fixed;
+  z-index: 39;
+  left: 50%;
+  bottom: calc(76px + 10px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 36px), 684px);
+  min-height: 56px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 750;
+  box-shadow: 0 12px 30px -12px color-mix(in oklch, var(--primary) 70%, transparent);
+  animation: guest-fade-up 0.25s ease both;
+}
+
+.guest-app .cart-bar > span:nth-child(2) {
+  flex: 1;
+  text-align: left;
+}
+
+.guest-app .cart-count {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklch, var(--primary-foreground) 18%, transparent);
+  font-size: 13px;
+}
+
+.guest-app .cart-lines {
+  display: grid;
+  border-top: 1px solid var(--border);
+  margin: 18px 0 0;
+}
+
+.guest-app .cart-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.guest-app .cart-line-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.guest-app .cart-line-copy small,
+.guest-app .cart-line-copy em {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.guest-app .cart-line > b {
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.guest-app .cart-line-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guest-app .icon-button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+}
+
+.guest-app .cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 0 6px;
+  font-weight: 750;
+}
+
+.guest-app .cart-total strong {
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.guest-app .cart-note {
+  margin: 0 0 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.guest-app .cart-fields {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.guest-app .text-field {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.guest-app .text-field input {
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 400;
+  outline: 0;
+}
+
+.guest-app .text-field input:focus {
+  border-color: var(--primary);
+}
+
+.guest-app .form-error {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.guest-app .cart-screen .btn + .btn {
+  margin-top: 8px;
+}
+
+.guest-app .table-orders {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+}
+
+.guest-app .table-orders h2,
+.guest-app .list-title {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.guest-app .table-order {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 17px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.guest-app .table-order > span:first-child {
+  flex: 1;
+  display: grid;
+  gap: 3px;
+}
+
+.guest-app .table-order small {
+  color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+   Branding (Dashboard → Apparence)
+   The layout sets data-template / data-font and, when a brand colour is set,
+   overrides --primary / --primary-foreground inline.
+   --------------------------------------------------------------------------- */
+
+.guest-app {
+  /* Tailwind utilities used on shared pages (order tracking) follow the brand. */
+  --brand: var(--primary);
+  --brand-foreground: var(--primary-foreground);
+}
+
+.guest-app[data-font="serif"] {
+  --font-sans: var(--font-guest-serif), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-guest-serif-display), Georgia, "Times New Roman", serif;
+}
+
+.guest-app[data-font="mono"] {
+  --font-sans: var(--font-guest-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-guest-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Classique: serif titles, dashed separators, square pills. */
+.guest-app[data-template="classic"] {
+  --font-display: var(--font-guest-serif-display), Georgia, serif;
+}
+.guest-app[data-template="classic"] h2,
+.guest-app[data-template="classic"] .eyebrow {
+  letter-spacing: 0.22em;
+}
+.guest-app[data-template="classic"] .dish-row,
+.guest-app[data-template="classic"] .dish-list,
+.guest-app[data-template="classic"] .cart-line {
+  border-style: dashed;
+}
+.guest-app[data-template="classic"] .category-strip button {
+  border-radius: 3px;
+}
+
+/* Moderne: soft cards and generous rounding. */
+.guest-app[data-template="modern"] .dish-list {
+  display: grid;
+  gap: 10px;
+  border-top: 0;
+}
+.guest-app[data-template="modern"] .dish-row {
+  border: 0;
+  border-radius: 16px;
+  background: var(--card);
+  padding: 10px;
+  box-shadow: 0 6px 18px -14px var(--foreground);
+}
+.guest-app[data-template="modern"] .dish-row img,
+.guest-app[data-template="modern"] .dish-photo-thumb,
+.guest-app[data-template="modern"] .featured-dish,
+.guest-app[data-template="modern"] .search-box,
+.guest-app[data-template="modern"] .btn,
+.guest-app[data-template="modern"] .cart-bar {
+  border-radius: 14px;
+}
+
+/* Luxe: serif, spaced capitals, thin brand-coloured rules, sharp corners. */
+.guest-app[data-template="luxury"] {
+  --font-display: var(--font-guest-serif-display), Georgia, serif;
+  --copper: var(--primary);
+}
+.guest-app[data-template="luxury"] h1,
+.guest-app[data-template="luxury"] h2,
+.guest-app[data-template="luxury"] .dish-copy strong {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.guest-app[data-template="luxury"] .dish-row {
+  border-bottom-color: color-mix(in oklch, var(--primary) 35%, transparent);
+}
+.guest-app[data-template="luxury"] .dish-row img,
+.guest-app[data-template="luxury"] .dish-photo-thumb,
+.guest-app[data-template="luxury"] .featured-dish,
+.guest-app[data-template="luxury"] .btn,
+.guest-app[data-template="luxury"] .category-strip button,
+.guest-app[data-template="luxury"] .cart-bar {
+  border-radius: 0;
+}
+.guest-app[data-template="luxury"] .btn,
+.guest-app[data-template="luxury"] .category-strip button {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+}
+
+/* Premium sombre: dark surfaces. */
+.guest-app[data-template="premium-dark"] {
+  --background: oklch(0.17 0.008 60);
+  --foreground: oklch(0.95 0.01 80);
+  --card: oklch(0.22 0.01 60);
+  --muted: oklch(0.27 0.01 60);
+  --muted-foreground: oklch(0.72 0.015 70);
+  --border: oklch(0.32 0.012 60);
+  --secondary: oklch(0.27 0.01 60);
+  --copper: oklch(0.78 0.1 75);
+}
+.guest-app[data-template="premium-dark"]:not([style*="--primary"]) {
+  --primary: oklch(0.8 0.11 80);
+  --primary-foreground: oklch(0.17 0.008 60);
+}
+.guest-app[data-template="premium-dark"] .image-label {
+  background: var(--card);
+}
+/* Featured cards use the text colour as a backdrop: keep them dark here. */
+.guest-app[data-template="premium-dark"] .featured-dish {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+.guest-app[data-template="premium-dark"] .featured-dish:after {
+  background: linear-gradient(transparent, color-mix(in oklch, var(--background) 90%, transparent));
+}
+
+/* Café: warm cards with dashed outlines. */
+.guest-app[data-template="cafe"] {
+  --background: oklch(0.95 0.025 75);
+}
+.guest-app[data-template="cafe"] .dish-row {
+  border: 2px dashed var(--border);
+  border-radius: 18px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: var(--card);
+}
+.guest-app[data-template="cafe"] .dish-list {
+  border-top: 0;
+}
+.guest-app[data-template="cafe"] .dish-row img,
+.guest-app[data-template="cafe"] .dish-photo-thumb,
+.guest-app[data-template="cafe"] .btn {
+  border-radius: 16px;
+}
+
+/* Local / Congo: bold, brand-coloured left accents. */
+.guest-app[data-template="local"] h1,
+.guest-app[data-template="local"] h2 {
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.guest-app[data-template="local"] .dish-row {
+  border-left: 4px solid var(--primary);
+  padding-left: 12px;
+}
+.guest-app[data-template="local"] .eyebrow {
+  color: var(--primary);
+}
+
+/* Restauration rapide: heavy type, offset shadows in the brand colour. */
+.guest-app[data-template="fast-food"] h1,
+.guest-app[data-template="fast-food"] h2,
+.guest-app[data-template="fast-food"] .dish-copy strong {
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.guest-app[data-template="fast-food"] .dish-list {
+  display: grid;
+  gap: 12px;
+  border-top: 0;
+}
+.guest-app[data-template="fast-food"] .dish-row {
+  border: 2px solid var(--foreground);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--card);
+  box-shadow: 4px 4px 0 0 var(--primary);
+}
+.guest-app[data-template="fast-food"] .btn {
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 0 var(--foreground);
+}
+
+/* Coffee shop: muted surfaces, round photos. */
+.guest-app[data-template="coffee"] {
+  --background: oklch(0.94 0.02 70);
+}
+.guest-app[data-template="coffee"] .dish-row img,
+.guest-app[data-template="coffee"] .dish-photo-thumb {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+}
+.guest-app[data-template="coffee"] h2,
+.guest-app[data-template="coffee"] .dish-copy strong {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Gastronomique: light weights, wide spacing, centred headings, no photos frames. */
+.guest-app[data-template="fine-dining"] {
+  --font-display: var(--font-guest-serif-display), Georgia, serif;
+}
+.guest-app[data-template="fine-dining"] h1,
+.guest-app[data-template="fine-dining"] h2,
+.guest-app[data-template="fine-dining"] .dish-copy strong {
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+.guest-app[data-template="fine-dining"] .menu-intro,
+.guest-app[data-template="fine-dining"] .section-heading {
+  text-align: center;
+  justify-content: center;
+}
+.guest-app[data-template="fine-dining"] .dish-row img,
+.guest-app[data-template="fine-dining"] .dish-photo-thumb,
+.guest-app[data-template="fine-dining"] .btn,
+.guest-app[data-template="fine-dining"] .category-strip button {
+  border-radius: 0;
+}
+
+/* Éditorial: black type, thick top rules. */
+.guest-app[data-template="editorial"] h1,
+.guest-app[data-template="editorial"] h2,
+.guest-app[data-template="editorial"] .dish-copy strong {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+.guest-app[data-template="editorial"] .dish-list {
+  border-top: 3px solid var(--foreground);
+}
+.guest-app[data-template="editorial"] .dish-row {
+  border-bottom: 1px solid var(--foreground);
+}
+.guest-app[data-template="editorial"] .dish-row img,
+.guest-app[data-template="editorial"] .dish-photo-thumb,
+.guest-app[data-template="editorial"] .btn,
+.guest-app[data-template="editorial"] .category-strip button {
+  border-radius: 0;
+}

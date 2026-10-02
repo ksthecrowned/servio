@@ -4,33 +4,18 @@ import { useState, useTransition } from "react";
 
 import {
   claimWaiterRequest,
+  markTableCleared,
   resolveWaiterRequest,
   transferWaiterRequest,
 } from "@/app/actions/staff-ops";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ReadyOrderCard } from "@/components/staff/ready-order-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { isRequestLate, requestAge, requestDetail, requestTitle } from "@/lib/request-status";
-
-export type FloorTable = {
-  id: string;
-  label: string;
-  status: string;
-  openCount: number;
-};
+import type { FloorRequest, FloorTable, WaiterFloor } from "@/lib/waiter-floor";
 
 export type WaiterColleague = { id: string; name: string };
-
-export type OpenServiceRequest = {
-  id: string;
-  type: string;
-  note: string | null;
-  created_at: string;
-  acknowledged_at: string | null;
-  assigned_staff_id: string | null;
-  assigneeName: string | null;
-  tableLabel: string;
-};
 
 const TABLE_STATUS: Record<string, string> = {
   available: "Libre",
@@ -39,7 +24,7 @@ const TABLE_STATUS: Record<string, string> = {
   preparing: "En préparation",
   ready: "Prête",
   bill_requested: "Addition",
-  cleaning: "Nettoyage",
+  cleaning: "À débarrasser",
 };
 
 function tableLine(label: string) {
@@ -48,39 +33,30 @@ function tableLine(label: string) {
 
 export function WaiterBoard({
   staffId,
-  tables,
-  requests,
+  floor,
   colleagues,
 }: {
   staffId: string;
-  tables: FloorTable[];
-  requests: OpenServiceRequest[];
+  floor: WaiterFloor;
   colleagues: WaiterColleague[];
 }) {
-  const late = requests.filter((request) => isRequestLate(request));
-  const lateIds = new Set(late.map((request) => request.id));
-  const fresh = requests.filter((request) => !request.acknowledged_at && !lateIds.has(request.id));
-  const active = requests.filter((request) => request.acknowledged_at && !lateIds.has(request.id));
+  const hasMyTables = floor.tables.some((table) => table.mine);
 
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3">
         <h2 className="font-medium">Salle</h2>
+        {!hasMyTables ? (
+          <p className="text-sm text-muted-foreground">
+            Aucune table ne vous est attribuée : vous recevez les demandes des tables sans serveur
+            attitré.
+          </p>
+        ) : null}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {tables.map((table) => (
-            <Card key={table.id}>
-              <CardContent className="flex flex-col gap-1 pt-5">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium">{tableLine(table.label)}</p>
-                  {table.openCount > 0 ? <Badge>{table.openCount}</Badge> : null}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {TABLE_STATUS[table.status] ?? table.status}
-                </p>
-              </CardContent>
-            </Card>
+          {floor.tables.map((table) => (
+            <FloorTableCard key={table.id} table={table} />
           ))}
-          {tables.length === 0 ? (
+          {floor.tables.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune table sur cette salle.</p>
           ) : null}
         </div>
@@ -89,26 +65,99 @@ export function WaiterBoard({
       <RequestSection
         title="En retard"
         empty=""
-        requests={late}
+        requests={floor.late}
         staffId={staffId}
         colleagues={colleagues}
         emphasize
       />
+
+      <section className="flex flex-col gap-3">
+        <h2 className="font-medium">
+          À servir{floor.toServe.length > 0 ? ` (${floor.toServe.length})` : ""}
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {floor.toServe.map((order) => (
+            <ReadyOrderCard
+              key={order.id}
+              order={{
+                id: order.id,
+                order_number: order.order_number,
+                tableLabel: order.tableLabel,
+                order_items: order.items,
+              }}
+              note={order.mine ? null : `Table de ${order.tableWaiterName ?? "un collègue"}`}
+            />
+          ))}
+        </div>
+        {floor.toServe.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucune commande prête en cuisine.</p>
+        ) : null}
+      </section>
+
       <RequestSection
-        title="Nouvelles demandes"
+        title="Mes tables · nouvelles demandes"
         empty="Aucune nouvelle demande."
-        requests={fresh}
+        requests={floor.myNew}
         staffId={staffId}
         colleagues={colleagues}
       />
       <RequestSection
-        title="En cours"
+        title="Mes tables · en cours"
         empty="Aucune demande en cours."
-        requests={active}
+        requests={floor.myActive}
         staffId={staffId}
         colleagues={colleagues}
+      />
+      <RequestSection
+        title="Autres tables"
+        empty=""
+        requests={floor.others}
+        staffId={staffId}
+        colleagues={colleagues}
+        emphasize
       />
     </div>
+  );
+}
+
+function FloorTableCard({ table }: { table: FloorTable }) {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const toClear = table.status === "cleaning";
+
+  return (
+    <Card className={table.mine ? "border-brand" : undefined}>
+      <CardContent className="flex flex-col gap-1 pt-5">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-medium">{tableLine(table.label)}</p>
+          {table.openCount > 0 ? <Badge>{table.openCount}</Badge> : null}
+        </div>
+        <p className={toClear ? "text-xs font-medium text-destructive" : "text-xs text-muted-foreground"}>
+          {TABLE_STATUS[table.status] ?? table.status}
+        </p>
+        <p className={table.mine ? "text-xs font-medium text-brand" : "text-xs text-muted-foreground"}>
+          {table.mine ? "Ma table" : (table.assigneeName ?? "Sans serveur attitré")}
+        </p>
+        {toClear ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-2"
+            disabled={isPending}
+            onClick={() => {
+              setError(null);
+              startTransition(async () => {
+                const result = await markTableCleared(table.id);
+                setError(result.error);
+              });
+            }}
+          >
+            {isPending ? "Enregistrement…" : "Table débarrassée"}
+          </Button>
+        ) : null}
+        {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -122,7 +171,7 @@ function RequestSection({
 }: {
   title: string;
   empty: string;
-  requests: OpenServiceRequest[];
+  requests: FloorRequest[];
   staffId: string;
   colleagues: WaiterColleague[];
   emphasize?: boolean;
@@ -150,7 +199,7 @@ function RequestCard({
   staffId,
   colleagues,
 }: {
-  request: OpenServiceRequest;
+  request: FloorRequest;
   staffId: string;
   colleagues: WaiterColleague[];
 }) {
@@ -176,7 +225,10 @@ function RequestCard({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-medium">{requestTitle(request.type, request.note)}</p>
-            <p className="text-sm text-muted-foreground">{tableLine(request.tableLabel)}</p>
+            <p className="text-sm text-muted-foreground">
+              {tableLine(request.tableLabel)}
+              {request.tableWaiterName ? ` · serveur attitré : ${request.tableWaiterName}` : ""}
+            </p>
             {detail ? <p className="mt-1 text-sm">{detail}</p> : null}
             <p className="mt-1 text-xs text-muted-foreground">
               {requestAge(request.created_at)}

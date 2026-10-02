@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { loadPlanAccess } from "@/lib/subscription";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type BrandingActionState = { error: string | null; success: boolean };
@@ -20,11 +22,11 @@ export async function updateBranding(
   const fontFamily = String(formData.get("fontFamily") ?? "").trim();
 
   if (primaryColor && !HEX.test(primaryColor)) {
-    return { error: "Brand colour must be a hex value like #C2410C.", success: false };
+    return { error: "La couleur doit être au format hexadécimal, par exemple #C2410C.", success: false };
   }
 
   if (fontFamily && !FONTS.includes(fontFamily)) {
-    return { error: "Unknown font.", success: false };
+    return { error: "Police inconnue.", success: false };
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -35,12 +37,20 @@ export async function updateBranding(
     // dangling reference.
     const { data: template } = await supabase
       .from("templates")
-      .select("id")
+      .select("id, is_premium")
       .eq("id", templateId)
       .maybeSingle();
 
     if (!template) {
-      return { error: "That template no longer exists.", success: false };
+      return { error: "Ce modèle n’existe plus.", success: false };
+    }
+
+    // Enforced here, not only by the locked cards in the form.
+    if (template.is_premium) {
+      const access = await loadPlanAccess(supabase, restaurant.restaurantId);
+      if (access.effectiveTier === "starter") {
+        return { error: "Les modèles premium nécessitent la formule Business ou Pro.", success: false };
+      }
     }
   }
 
@@ -55,7 +65,7 @@ export async function updateBranding(
     { onConflict: "restaurant_id" },
   );
 
-  if (error) return { error: error.message, success: false };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), success: false };
 
   revalidatePath("/dashboard/branding");
   return { error: null, success: true };

@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      - name: Build
+        run: bun run build
+        env:
+          # Placeholders: the build must not need real credentials.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          STAFF_SESSION_SECRET: placeholder-staff-session-secret
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+  database:
+    name: Migrations, SQL tests, generated types
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Supabase runs Postgres 15/17; the migrations need >= 15.
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run db:verify
+      - run: bun run db:types
+      - name: Generated types are up to date
+        run: |
+          git diff --exit-code -- src/lib/supabase/database.types.ts || {
+            echo "::error::database.types.ts is stale. Run 'bun run db:verify && bun run db:types' and commit the result."
+            exit 1
+          }

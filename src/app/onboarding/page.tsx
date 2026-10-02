@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { CreateRestaurantForm } from "@/components/onboarding/create-restaurant-form";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Set up your restaurant — Servio" };
+export const metadata: Metadata = { title: "Créer votre restaurant — Servio" };
 
 export default async function OnboardingPage() {
   const supabase = await createClient();

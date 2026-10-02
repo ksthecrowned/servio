@@ -7,12 +7,12 @@ import { LayoutDashboard, Store, Users, CreditCard, Receipt, Palette } from "luc
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin", label: "Vue d’ensemble", icon: LayoutDashboard },
   { href: "/admin/restaurants", label: "Restaurants", icon: Store },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
-  { href: "/admin/payments", label: "Payments", icon: Receipt },
-  { href: "/admin/templates", label: "Templates", icon: Palette },
+  { href: "/admin/users", label: "Utilisateurs", icon: Users },
+  { href: "/admin/subscriptions", label: "Abonnements", icon: CreditCard },
+  { href: "/admin/payments", label: "Paiements", icon: Receipt },
+  { href: "/admin/templates", label: "Modèles", icon: Palette },
 ];
 
 export function AdminSidebarNav() {

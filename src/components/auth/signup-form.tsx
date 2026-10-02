@@ -19,12 +19,12 @@ export function SignupForm() {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Confirm your email</CardTitle>
+          <CardTitle>Confirmez votre adresse e-mail</CardTitle>
           <CardDescription>{state.notice}</CardDescription>
         </CardHeader>
         <CardContent>
           <Link href="/login" className="text-sm underline underline-offset-4">
-            Go to sign in
+            Aller à la connexion
           </Link>
         </CardContent>
       </Card>
@@ -34,21 +34,21 @@ export function SignupForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Create your Servio account</CardTitle>
-        <CardDescription>Set up your restaurant in a few minutes.</CardDescription>
+        <CardTitle>Créez votre compte Servio</CardTitle>
+        <CardDescription>Configurez votre restaurant en quelques minutes.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="fullName">Your name</Label>
+            <Label htmlFor="fullName">Votre nom</Label>
             <Input id="fullName" name="fullName" required autoComplete="name" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <Input id="email" name="email" type="email" required autoComplete="email" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe (8 caractères minimum)</Label>
             <Input
               id="password"
               name="password"
@@ -60,12 +60,12 @@ export function SignupForm() {
           </div>
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Creating account…" : "Create account"}
+            {isPending ? "Création du compte…" : "Créer mon compte"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Vous avez déjà un compte ?{" "}
             <Link href="/login" className="text-foreground underline underline-offset-4">
-              Sign in
+              Se connecter
             </Link>
           </p>
         </form>

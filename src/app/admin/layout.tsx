@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
         <form action={signOutOwner} className="px-3">
           <Button type="submit" variant="ghost" size="sm" className="w-full justify-start px-0">
-            Sign out
+            Se déconnecter
           </Button>
         </form>
       </aside>

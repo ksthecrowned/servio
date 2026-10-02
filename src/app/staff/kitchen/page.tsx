@@ -1,5 +1,7 @@
 import { AutoRefresh } from "@/components/auto-refresh";
 import { KitchenOrderCard } from "@/components/staff/kitchen-order-card";
+import { StaffAlerts } from "@/components/staff/staff-alerts";
+import type { StaffAlert } from "@/lib/staff-alerts";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireStaffSession } from "@/lib/staff-session";
@@ -24,20 +26,39 @@ export default async function KitchenPage() {
 
   const { data: orders } = await query;
 
+  const tableLabelOf = (order: NonNullable<typeof orders>[number]) =>
+    (order.table_sessions as unknown as { restaurant_tables: { label: string } } | null)?.restaurant_tables.label ??
+    null;
+
+  // New orders waiting to be accepted ring the kitchen (3 beeps).
+  const alerts: StaffAlert[] = (orders ?? [])
+    .filter((order) => order.status === "pending")
+    .map((order) => {
+      const label = tableLabelOf(order);
+      return {
+        key: `order:${order.id}`,
+        kind: "new_order",
+        title: `Nouvelle commande — ${label ? `Table ${label}` : `n° ${order.order_number}`}`,
+        body: order.order_items.map((item) => `${item.item_name} × ${item.quantity}`).join(", "),
+      };
+    });
+
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-muted/20 p-6">
       <AutoRefresh intervalMs={3000} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Kitchen</h1>
+          <h1 className="text-2xl font-semibold">Cuisine</h1>
           <p className="text-muted-foreground">{session.name}</p>
         </div>
         <form action={staffLogout}>
           <Button type="submit" variant="outline">
-            Sign out
+            Quitter
           </Button>
         </form>
       </div>
+
+      <StaffAlerts staffId={session.staffId} alerts={alerts} screenName="Cuisine" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {(orders ?? []).map((order) => (
@@ -48,14 +69,12 @@ export default async function KitchenPage() {
               order_number: order.order_number,
               status: order.status,
               order_items: order.order_items,
-              tableLabel:
-                (order.table_sessions as unknown as { restaurant_tables: { label: string } } | null)
-                  ?.restaurant_tables.label ?? null,
+              tableLabel: tableLabelOf(order),
             }}
           />
         ))}
         {(!orders || orders.length === 0) && (
-          <p className="text-sm text-muted-foreground">No active orders. New orders will appear here instantly.</p>
+          <p className="text-sm text-muted-foreground">Aucune commande en cours. Les nouvelles commandes s’afficheront ici aussitôt.</p>
         )}
       </div>
     </div>

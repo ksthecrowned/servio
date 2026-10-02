@@ -3,13 +3,14 @@ import Link from "next/link";
 import { BrandingForm } from "@/components/dashboard/branding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
+import { loadPlanAccess } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function BrandingPage() {
   const restaurant = await requireCurrentRestaurant();
   const supabase = await createClient();
 
-  const [{ data: templates }, { data: theme }, { data: subscription }, { data: branch }] =
+  const [{ data: templates }, { data: theme }, access, { data: branch }] =
     await Promise.all([
       supabase.from("templates").select("id, slug, name, is_premium").order("is_premium"),
       supabase
@@ -17,11 +18,7 @@ export default async function BrandingPage() {
         .select("template_id, primary_color, font_family")
         .eq("restaurant_id", restaurant.restaurantId)
         .maybeSingle(),
-      supabase
-        .from("subscriptions")
-        .select("status, subscription_plans(tier)")
-        .eq("restaurant_id", restaurant.restaurantId)
-        .maybeSingle(),
+      loadPlanAccess(supabase, restaurant.restaurantId),
       supabase
         .from("branches")
         .select("id, slug")
@@ -40,19 +37,16 @@ export default async function BrandingPage() {
         .maybeSingle()
     : { data: null };
 
-  // No subscription row yet means the restaurant is still in its trial, which
-  // the PRD gives Business-level features (section 48) — so premium templates
-  // are unlocked until a Starter plan is actually attached.
-  const tier = (subscription?.subscription_plans as unknown as { tier: string } | null)?.tier;
-  const canUsePremium = !subscription || tier !== "starter";
+  // A running trial has Business-level features (PRD section 48).
+  const canUsePremium = access.effectiveTier !== "starter";
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Branding</h1>
+          <h1 className="text-2xl font-semibold">Apparence</h1>
           <p className="text-muted-foreground">
-            Change how your QR menu looks. Your menu items and prices stay exactly as they are.
+            Changez l’apparence de votre menu QR. Vos plats et vos prix restent exactement les mêmes.
           </p>
         </div>
         {branch && previewTable ? (
@@ -61,16 +55,16 @@ export default async function BrandingPage() {
             target="_blank"
             className="text-sm underline underline-offset-4"
           >
-            Preview live menu →
+            Voir le menu en ligne →
           </Link>
         ) : null}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Template & colours</CardTitle>
+          <CardTitle className="text-base">Modèle et couleurs</CardTitle>
           <CardDescription>
-            Switching template never changes your menu data — only its presentation.
+            Changer de modèle ne modifie jamais le contenu du menu, seulement sa présentation.
           </CardDescription>
         </CardHeader>
         <CardContent>

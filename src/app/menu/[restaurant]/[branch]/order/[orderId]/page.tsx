@@ -1,11 +1,17 @@
-import { formatCurrency } from "@/lib/currency";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+
+import { formatCurrency } from "@/lib/currency";
 
 import { AutoRefresh } from "@/components/auto-refresh";
 import { FeedbackForm } from "@/components/menu/feedback-form";
 import { OrderStatusStepper } from "@/components/menu/order-status-stepper";
 import { Badge } from "@/components/ui/badge";
+import { ORDER_STATUS_LABEL } from "@/lib/labels";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+type AddonSelection = { name: string; price: number }[];
 
 export default async function OrderTrackingPage(
   props: PageProps<"/menu/[restaurant]/[branch]/order/[orderId]">,
@@ -18,6 +24,7 @@ export default async function OrderTrackingPage(
     .select(
       `id, order_number, status, subtotal, discount_amount, tax_amount, service_charge_amount, total_amount, created_at,
        restaurants!inner(name, slug), branches!orders_branch_id_fkey!inner(name, slug),
+       table_sessions!orders_table_session_id_fkey(table_id),
        order_items(id, item_name, variant_name, unit_price, quantity, addon_selection)`,
     )
     .eq("id", orderId)
@@ -31,6 +38,7 @@ export default async function OrderTrackingPage(
   }
 
   const isFinal = ["served", "completed", "cancelled"].includes(order.status);
+  const tableId = order.table_sessions?.table_id ?? null;
 
   let hasFeedback = false;
   if (isFinal && order.status !== "cancelled") {
@@ -46,10 +54,19 @@ export default async function OrderTrackingPage(
     <div className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-16">
       {!isFinal && <AutoRefresh intervalMs={4000} />}
 
+      {tableId ? (
+        <Link
+          href={`/menu/${restaurantSlug}/${branchSlug}/${tableId}`}
+          className="flex w-fit items-center gap-2 pt-2 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          <ArrowLeft className="size-4" /> Retour au menu
+        </Link>
+      ) : null}
+
       <div className="pt-6 text-center">
         <p className="text-sm text-muted-foreground">{restaurant?.name}</p>
-        <h1 className="text-2xl font-semibold">Commande #{order.order_number}</h1>
-        <Badge className="mt-2 capitalize">{order.status}</Badge>
+        <h1 className="text-2xl font-semibold">Commande n° {order.order_number}</h1>
+        <Badge className="mt-2">{ORDER_STATUS_LABEL[order.status]}</Badge>
       </div>
 
       <div className="rounded-lg border p-4">
@@ -58,15 +75,27 @@ export default async function OrderTrackingPage(
 
       <div className="flex flex-col gap-2 rounded-lg border p-4">
         <h2 className="font-medium">Articles</h2>
-        {order.order_items.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm">
-            <span>
-              {item.item_name}
-              {item.variant_name ? ` (${item.variant_name})` : ""} × {item.quantity}
-            </span>
-            <span>{formatCurrency(item.unit_price * item.quantity)}</span>
-          </div>
-        ))}
+        {order.order_items.map((item) => {
+          // Add-ons are priced per unit, like on the server (place_order).
+          const addons = (item.addon_selection ?? []) as AddonSelection;
+          const addonsTotal = addons.reduce((sum, addon) => sum + Number(addon.price), 0);
+          return (
+            <div key={item.id} className="flex justify-between gap-4 text-sm">
+              <span>
+                {item.item_name}
+                {item.variant_name ? ` (${item.variant_name})` : ""} × {item.quantity}
+                {addons.length > 0 ? (
+                  <span className="block text-xs text-muted-foreground">
+                    + {addons.map((addon) => addon.name).join(", ")}
+                  </span>
+                ) : null}
+              </span>
+              <span className="whitespace-nowrap">
+                {formatCurrency((item.unit_price + addonsTotal) * item.quantity)}
+              </span>
+            </div>
+          );
+        })}
 
         <div className="mt-2 flex flex-col gap-1 border-t pt-2 text-sm">
           <div className="flex justify-between"><span>Sous-total</span><span>{formatCurrency(order.subtotal)}</span></div>

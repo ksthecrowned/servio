@@ -1,9 +1,13 @@
 import { staffLogout } from "@/app/actions/staff-auth";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { WaiterBoard, type OpenServiceRequest } from "@/components/staff/waiter-board";
+import { StaffAlerts } from "@/components/staff/staff-alerts";
+import { WaiterBoard } from "@/components/staff/waiter-board";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireStaffSession } from "@/lib/staff-session";
+import { planWaiterFloor } from "@/lib/waiter-floor";
+
+const NO_BRANCH = ["00000000-0000-0000-0000-000000000000"];
 
 export default async function WaiterPage() {
   const session = await requireStaffSession("waiter");
@@ -17,19 +21,28 @@ export default async function WaiterPage() {
   const branchIds = session.branchId
     ? [session.branchId]
     : (branches ?? []).map((branch) => branch.id);
+  const scope = branchIds.length > 0 ? branchIds : NO_BRANCH;
 
-  const [{ data: tables }, { data: requests }, { data: waiters }] = await Promise.all([
+  const [{ data: tables }, { data: requests }, { data: readyOrders }, { data: waiters }] = await Promise.all([
     admin
       .from("restaurant_tables")
-      .select("id, label, status")
-      .in("branch_id", branchIds.length > 0 ? branchIds : ["00000000-0000-0000-0000-000000000000"])
-      .order("label"),
+      .select("id, label, status, assigned_staff_id")
+      .in("branch_id", scope),
     admin
       .from("waiter_requests")
-      .select("id, type, note, created_at, acknowledged_at, assigned_staff_id, table_id, restaurant_tables!waiter_requests_table_id_fkey(label)")
-      .in("branch_id", branchIds.length > 0 ? branchIds : ["00000000-0000-0000-0000-000000000000"])
+      .select("id, type, note, created_at, acknowledged_at, assigned_staff_id, table_id")
+      .in("branch_id", scope)
       .is("resolved_at", null)
       .order("created_at"),
+    admin
+      .from("orders")
+      .select(
+        "id, order_number, table_sessions!orders_table_session_id_fkey(table_id), order_items(id, item_name, variant_name, quantity)",
+      )
+      .eq("restaurant_id", session.restaurantId)
+      .in("branch_id", scope)
+      .eq("status", "ready")
+      .order("updated_at"),
     admin
       .from("staff")
       .select("id, name")
@@ -39,31 +52,18 @@ export default async function WaiterPage() {
       .order("name"),
   ]);
 
-  const names = new Map((waiters ?? []).map((waiter) => [waiter.id, waiter.name]));
-  const openRequests: OpenServiceRequest[] = (requests ?? []).map((request) => ({
-    id: request.id,
-    type: request.type,
-    note: request.note,
-    created_at: request.created_at,
-    acknowledged_at: request.acknowledged_at,
-    assigned_staff_id: request.assigned_staff_id,
-    assigneeName: request.assigned_staff_id ? (names.get(request.assigned_staff_id) ?? null) : null,
-    tableLabel: (request.restaurant_tables as unknown as { label: string } | null)?.label ?? "—",
-  }));
-
-  const counts = new Map<string, number>();
-  for (const request of requests ?? []) {
-    counts.set(request.table_id, (counts.get(request.table_id) ?? 0) + 1);
-  }
-
-  const floor = (tables ?? [])
-    .map((table) => ({
-      id: table.id,
-      label: table.label,
-      status: table.status,
-      openCount: counts.get(table.id) ?? 0,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label, "fr", { numeric: true }));
+  const floor = planWaiterFloor({
+    staffId: session.staffId,
+    tables: tables ?? [],
+    requests: requests ?? [],
+    readyOrders: (readyOrders ?? []).map((order) => ({
+      id: order.id,
+      order_number: order.order_number,
+      table_id: order.table_sessions?.table_id ?? null,
+      items: order.order_items,
+    })),
+    waiterNames: new Map((waiters ?? []).map((waiter) => [waiter.id, waiter.name])),
+  });
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 bg-muted/20 p-4 sm:p-6">
@@ -79,10 +79,10 @@ export default async function WaiterPage() {
           </Button>
         </form>
       </div>
+      <StaffAlerts staffId={session.staffId} alerts={floor.alerts} screenName="Service" />
       <WaiterBoard
         staffId={session.staffId}
-        tables={floor}
-        requests={openRequests}
+        floor={floor}
         colleagues={(waiters ?? []).filter((waiter) => waiter.id !== session.staffId)}
       />
     </div>

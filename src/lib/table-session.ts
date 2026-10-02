@@ -14,7 +14,7 @@ export async function ensureOpenTableSession(branchId: string, tableId: string) 
   if (!table) return null;
 
   const existing = await findActiveSession(admin, tableId);
-  const session = existing ?? (await openSession(admin, tableId));
+  const session = existing ?? (await openSession(admin, branchId, tableId));
   if (!session) return null;
 
   if (table.status === "available" || table.status === "cleaning") {
@@ -40,10 +40,14 @@ async function findActiveSession(
   return data;
 }
 
-async function openSession(admin: ReturnType<typeof createAdminClient>, tableId: string) {
+async function openSession(
+  admin: ReturnType<typeof createAdminClient>,
+  branchId: string,
+  tableId: string,
+) {
   const { data, error } = await admin
     .from("table_sessions")
-    .insert({ table_id: tableId, status: "open" })
+    .insert({ table_id: tableId, branch_id: branchId, status: "open" })
     .select("id, opened_at")
     .single();
 

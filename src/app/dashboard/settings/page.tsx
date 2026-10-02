@@ -18,13 +18,13 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground">Restaurant profile, tax and service charge.</p>
+        <h1 className="text-2xl font-semibold">Paramètres</h1>
+        <p className="text-muted-foreground">Profil du restaurant, taxes et frais de service.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Profile</CardTitle>
+          <CardTitle className="text-base">Profil</CardTitle>
         </CardHeader>
         <CardContent>
           {data ? (

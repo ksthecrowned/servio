@@ -151,10 +151,6 @@ alter table bills
   unique (id, restaurant_id);
 
 alter table bills
-  add constraint bills_id_restaurant_unique
-  unique (id, restaurant_id);
-
-alter table bills
   add constraint bills_branch_restaurant_fk
   foreign key (branch_id, restaurant_id)
   references branches(id, restaurant_id)

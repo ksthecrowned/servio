@@ -14,28 +14,29 @@ export function CreateRestaurantForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Set up your restaurant</CardTitle>
+        <CardTitle>Créez votre restaurant</CardTitle>
         <CardDescription>
-          We&apos;ll create your first branch too — you can add tables and menu items next.
+          Nous créons aussi votre première succursale ; vous pourrez ensuite ajouter vos tables et
+          votre menu.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name">Restaurant name</Label>
-            <Input id="name" name="name" placeholder="The Coffee House" required />
+            <Label htmlFor="name">Nom du restaurant</Label>
+            <Input id="name" name="name" placeholder="Chez Mama Ngoma" required />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="branchName">First branch name</Label>
-            <Input id="branchName" name="branchName" placeholder="Main Branch" />
+            <Label htmlFor="branchName">Nom de la première succursale</Label>
+            <Input id="branchName" name="branchName" placeholder="Succursale principale" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cuisineType">Cuisine type</Label>
-            <Input id="cuisineType" name="cuisineType" placeholder="Cafe, Bakery, Fast Food…" />
+            <Label htmlFor="cuisineType">Type de cuisine</Label>
+            <Input id="cuisineType" name="cuisineType" placeholder="Congolaise, boulangerie, fast-food…" />
           </div>
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Creating…" : "Create restaurant"}
+            {isPending ? "Création…" : "Créer le restaurant"}
           </Button>
         </form>
       </CardContent>

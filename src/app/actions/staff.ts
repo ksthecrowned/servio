@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
+import { ROLE_LABEL } from "@/lib/labels";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { hashPin, verifyPin } from "@/lib/staff-pin";
+import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export type StaffActionState = { error: string | null };
@@ -17,7 +19,12 @@ export type StaffActionState = { error: string | null };
  * here would create accounts that can be made but never signed into. Managers
  * get a real email/password account instead.
  */
-const VALID_ROLES = ["waiter", "kitchen", "cashier"];
+const VALID_ROLES = ["waiter", "kitchen", "cashier"] as const;
+type StaffRole = (typeof VALID_ROLES)[number];
+
+function isStaffRole(value: string): value is StaffRole {
+  return (VALID_ROLES as readonly string[]).includes(value);
+}
 
 export async function addStaff(
   _prevState: StaffActionState,
@@ -28,13 +35,13 @@ export async function addStaff(
   const role = String(formData.get("role") ?? "");
   const pin = String(formData.get("pin") ?? "");
 
-  if (!name) return { error: "Name is required." };
-  if (!VALID_ROLES.includes(role)) return { error: "Choose a valid role." };
+  if (!name) return { error: "Indiquez le nom." };
+  if (!isStaffRole(role)) return { error: "Choisissez un rôle valide." };
 
   // Exactly 4 digits: the staff login keypad (PRD section 7's ● ● ● ●) is a
   // fixed 4-dot pad, so a longer PIN would be impossible to type in.
   if (!/^\d{4}$/.test(pin)) {
-    return { error: "PIN must be exactly 4 digits." };
+    return { error: "Le PIN doit comporter exactement 4 chiffres." };
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -54,7 +61,7 @@ export async function addStaff(
   const clash = (sameRole ?? []).find((member) => verifyPin(pin, member.pin_hash));
   if (clash) {
     return {
-      error: `${clash.name} already uses that PIN for the ${role} role. Pick a different PIN.`,
+      error: `${clash.name} utilise déjà ce PIN pour le rôle ${ROLE_LABEL[role]}. Choisissez-en un autre.`,
     };
   }
 
@@ -66,7 +73,31 @@ export async function addStaff(
     pin_hash: hashPin(pin),
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+
+  revalidatePath("/dashboard/staff");
+  return { error: null };
+}
+
+/**
+ * Deactivating a staff member signs them out everywhere at once:
+ * requireStaffSession re-checks is_active on every request.
+ *
+ * Reactivation cannot check for a PIN clash the way addStaff does (only
+ * salted hashes are stored), so staffLogin refuses a PIN that matches more
+ * than one active account instead of guessing who it is.
+ */
+export async function setStaffActive(staffId: string, isActive: boolean): Promise<StaffActionState> {
+  const restaurant = await requireCurrentRestaurant();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("staff")
+    .update({ is_active: isActive })
+    .eq("id", staffId)
+    .eq("restaurant_id", restaurant.restaurantId);
+
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
 
   revalidatePath("/dashboard/staff");
   return { error: null };

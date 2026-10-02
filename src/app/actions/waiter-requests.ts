@@ -2,7 +2,12 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const VALID_TYPES = ["call_waiter", "water", "cutlery", "bill", "other"];
+const VALID_TYPES = ["call_waiter", "water", "cutlery", "bill", "other"] as const;
+type WaiterRequestType = (typeof VALID_TYPES)[number];
+
+function isWaiterRequestType(value: string): value is WaiterRequestType {
+  return (VALID_TYPES as readonly string[]).includes(value);
+}
 
 export async function requestWaiterAssistance(
   branchId: string,
@@ -10,8 +15,8 @@ export async function requestWaiterAssistance(
   type: string,
   note?: string,
 ): Promise<{ error: string | null }> {
-  if (!VALID_TYPES.includes(type)) {
-    return { error: "Invalid request type." };
+  if (!isWaiterRequestType(type)) {
+    return { error: "Type de demande invalide." };
   }
 
   const admin = createAdminClient();
@@ -24,7 +29,7 @@ export async function requestWaiterAssistance(
     .maybeSingle();
 
   if (!table) {
-    return { error: "Table not found." };
+    return { error: "Table introuvable." };
   }
 
   const { error } = await admin.from("waiter_requests").insert({
@@ -70,11 +75,13 @@ async function raiseBillForTable(
   tableId: string,
   restaurantId: string,
 ) {
+  // Any active session: a second bill request (or one made after ordering
+  // again) must still refresh the bill.
   const { data: session } = await admin
     .from("table_sessions")
     .select("id")
     .eq("table_id", tableId)
-    .eq("status", "open")
+    .neq("status", "closed")
     .maybeSingle();
 
   if (!session) return;

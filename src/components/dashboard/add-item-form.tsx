@@ -59,7 +59,7 @@ export function AddItemForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="basePrice">Prix (XAF)</Label>
+          <Label htmlFor="basePrice">Prix (FCFA)</Label>
           <Input id="basePrice" name="basePrice" type="number" min="0" step="1" placeholder="2500" required />
         </div>
       </div>

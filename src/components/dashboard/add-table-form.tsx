@@ -13,7 +13,7 @@ export function AddTableForm({ branches }: { branches: { id: string; name: strin
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="branchId">Branch</Label>
+        <Label htmlFor="branchId">Succursale</Label>
         <select
           id="branchId"
           name="branchId"
@@ -28,11 +28,11 @@ export function AddTableForm({ branches }: { branches: { id: string; name: strin
         </select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="label">Table label</Label>
+        <Label htmlFor="label">Nom de la table</Label>
         <Input id="label" name="label" placeholder="Table 05" required className="w-40" />
       </div>
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Adding…" : "Add table"}
+        {isPending ? "Ajout…" : "Ajouter la table"}
       </Button>
       {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
     </form>

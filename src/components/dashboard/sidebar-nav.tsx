@@ -18,16 +18,16 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/orders", label: "Orders", icon: ClipboardList },
+  { href: "/dashboard", label: "Vue d’ensemble", icon: LayoutDashboard },
+  { href: "/dashboard/orders", label: "Commandes", icon: ClipboardList },
   { href: "/dashboard/tables", label: "Tables", icon: Table2 },
   { href: "/dashboard/menu", label: "Menu", icon: UtensilsCrossed },
-  { href: "/dashboard/offers", label: "Offers", icon: Tag },
-  { href: "/dashboard/branding", label: "Branding", icon: Palette },
-  { href: "/dashboard/staff", label: "Staff", icon: Users },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/qr", label: "QR Codes", icon: QrCode },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/offers", label: "Offres", icon: Tag },
+  { href: "/dashboard/branding", label: "Apparence", icon: Palette },
+  { href: "/dashboard/staff", label: "Personnel", icon: Users },
+  { href: "/dashboard/analytics", label: "Statistiques", icon: BarChart3 },
+  { href: "/dashboard/qr", label: "QR codes", icon: QrCode },
+  { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
 ];
 
 export function SidebarNav() {

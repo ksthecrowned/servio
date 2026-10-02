@@ -29,7 +29,7 @@ export function ImageUpload({
   onChange,
   prefix = "img",
   className,
-  label = "Upload image",
+  label = "Ajouter une image",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -48,7 +48,10 @@ export function ImageUpload({
         .from(bucket)
         .upload(path, compressed, { contentType: compressed.type, upsert: false });
 
-      if (uploadError) throw new Error(uploadError.message);
+      if (uploadError) {
+        console.error(uploadError);
+        throw new Error("L’envoi de l’image a échoué. Réessayez.");
+      }
 
       const {
         data: { publicUrl },
@@ -56,7 +59,7 @@ export function ImageUpload({
 
       onChange(publicUrl);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed.");
+      setError(e instanceof Error ? e.message : "L’envoi de l’image a échoué.");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -86,7 +89,7 @@ export function ImageUpload({
             type="button"
             onClick={() => onChange(null)}
             className="absolute -top-2 -right-2 rounded-full border bg-background p-1 shadow-sm"
-            aria-label="Remove image"
+            aria-label="Retirer l’image"
           >
             <X className="size-3" />
           </button>
@@ -100,7 +103,7 @@ export function ImageUpload({
           className="w-fit"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-          {busy ? "Uploading…" : label}
+          {busy ? "Envoi…" : label}
         </Button>
       )}
 

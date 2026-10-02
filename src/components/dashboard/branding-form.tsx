@@ -36,7 +36,7 @@ export function BrandingForm({
       <input type="hidden" name="fontFamily" value={font} />
 
       <div className="flex flex-col gap-3">
-        <Label>Menu template</Label>
+        <Label>Modèle du menu</Label>
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {templates.map((template) => {
             const locked = template.is_premium && !canUsePremium;
@@ -57,7 +57,7 @@ export function BrandingForm({
                   {template.name}
                 </span>
                 <Badge variant={template.is_premium ? "brand" : "outline"}>
-                  {template.is_premium ? "Premium" : "Free"}
+                  {template.is_premium ? "Premium" : "Gratuit"}
                 </Badge>
               </button>
             );
@@ -65,21 +65,21 @@ export function BrandingForm({
         </div>
         {!canUsePremium && (
           <p className="text-xs text-muted-foreground">
-            Premium templates are available on the Business and Pro plans.
+            Les modèles premium sont disponibles avec les formules Business et Pro.
           </p>
         )}
       </div>
 
       <div className="flex flex-wrap items-end gap-6">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="primaryColor">Brand colour</Label>
+          <Label htmlFor="primaryColor">Couleur de la marque</Label>
           <div className="flex items-center gap-2">
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
               className="size-9 cursor-pointer rounded-md border bg-transparent"
-              aria-label="Pick brand colour"
+              aria-label="Choisir la couleur de la marque"
             />
             <Input
               id="primaryColor"
@@ -92,25 +92,25 @@ export function BrandingForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="font">Font</Label>
+          <Label htmlFor="font">Police</Label>
           <select
             id="font"
             value={font}
             onChange={(e) => setFont(e.target.value)}
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
           >
-            <option value="sans">Sans (modern)</option>
-            <option value="serif">Serif (classic)</option>
-            <option value="mono">Mono (minimal)</option>
+            <option value="sans">Sans empattement (moderne)</option>
+            <option value="serif">Avec empattement (classique)</option>
+            <option value="mono">Chasse fixe (minimaliste)</option>
           </select>
         </div>
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-      {state.success ? <p className="text-sm text-brand">Saved — your QR menu is updated.</p> : null}
+      {state.success ? <p className="text-sm text-brand">Enregistré : votre menu QR est à jour.</p> : null}
 
       <Button type="submit" disabled={isPending} className="w-fit">
-        {isPending ? "Saving…" : "Save & publish"}
+        {isPending ? "Enregistrement…" : "Enregistrer et publier"}
       </Button>
     </form>
   );

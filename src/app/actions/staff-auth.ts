@@ -1,29 +1,55 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { signStaffSession, STAFF_SESSION_COOKIE } from "@/lib/staff-session";
+import {
+  signStaffSession,
+  STAFF_SESSION_COOKIE,
+  STAFF_SESSION_MAX_AGE_SECONDS,
+  type StaffRole,
+} from "@/lib/staff-session";
+import { ROLE_LABEL } from "@/lib/labels";
 import { verifyPin } from "@/lib/staff-pin";
+import { userFacingError } from "@/lib/supabase/errors";
 
 export type StaffLoginState = { error: string | null };
 
-const ROLE_HOME: Record<string, string> = {
+const ROLE_HOME: Record<StaffRole, string> = {
   waiter: "/staff/waiter",
   kitchen: "/staff/kitchen",
   cashier: "/staff/cashier",
 };
 
+function isStaffRole(value: string): value is StaffRole {
+  return Object.hasOwn(ROLE_HOME, value);
+}
+
+/**
+ * Client IP for sign-in throttling. On Vercel the first x-forwarded-for
+ * entry is set by the platform and cannot be spoofed; behind another proxy
+ * make sure it overwrites the header. If it is spoofable, only the per-IP
+ * limit is weakened — the per-role limit still applies.
+ */
+async function clientIp(): Promise<string> {
+  const headerStore = await headers();
+  return (
+    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip")?.trim() ||
+    "unknown"
+  );
+}
+
 /**
  * Resolves a restaurant code to its display name, so the sign-in screen can
- * confirm "The Coffee House" before anyone starts tapping a PIN.
+ * confirm "Chez Mama Ngoma" before anyone starts tapping a PIN.
  */
 export async function lookupRestaurant(
   code: string,
 ): Promise<{ slug: string; name: string } | { error: string }> {
   const slug = code.trim().toLowerCase();
-  if (!slug) return { error: "Enter your restaurant code." };
+  if (!slug) return { error: "Saisissez le code de votre restaurant." };
 
   const admin = createAdminClient();
   const { data: restaurant } = await admin
@@ -33,7 +59,7 @@ export async function lookupRestaurant(
     .maybeSingle();
 
   if (!restaurant || restaurant.status !== "active") {
-    return { error: "No restaurant found with that code. Ask your manager to check it." };
+    return { error: "Aucun restaurant ne correspond à ce code. Demandez à votre responsable de le vérifier." };
   }
 
   return { slug: restaurant.slug, name: restaurant.name };
@@ -47,9 +73,9 @@ export async function staffLogin(
   const role = String(formData.get("role") ?? "");
   const pin = String(formData.get("pin") ?? "");
 
-  if (!restaurantSlug) return { error: "Enter your restaurant code." };
-  if (!ROLE_HOME[role]) return { error: "Choose your role." };
-  if (!/^\d{4}$/.test(pin)) return { error: "Enter your 4-digit PIN." };
+  if (!restaurantSlug) return { error: "Saisissez le code de votre restaurant." };
+  if (!isStaffRole(role)) return { error: "Choisissez votre rôle." };
+  if (!/^\d{4}$/.test(pin)) return { error: "Saisissez votre PIN à 4 chiffres." };
 
   const admin = createAdminClient();
 
@@ -61,7 +87,7 @@ export async function staffLogin(
     .maybeSingle();
 
   if (!restaurant) {
-    return { error: "No restaurant found with that code. Ask your manager to check it." };
+    return { error: "Aucun restaurant ne correspond à ce code. Demandez à votre responsable de le vérifier." };
   }
 
   const { data: candidates } = await admin
@@ -72,14 +98,37 @@ export async function staffLogin(
     .eq("is_active", true);
 
   if (!candidates || candidates.length === 0) {
-    return { error: `No ${role} accounts set up yet. Ask your manager to add you.` };
+    return { error: `Aucun compte ${ROLE_LABEL[role].toLowerCase()} n’existe encore. Demandez à votre responsable de vous ajouter.` };
   }
 
-  const match = candidates.find((candidate) => verifyPin(pin, candidate.pin_hash));
+  // Recorded before the PIN is checked, so parallel guesses are counted
+  // too; refused once the restaurant/device has too many recent failures.
+  const { data: attemptId, error: throttleError } = await admin.rpc("begin_staff_login_attempt", {
+    p_restaurant_id: restaurant.id,
+    p_role: role,
+    p_ip: await clientIp(),
+  });
 
-  if (!match) {
-    return { error: "That PIN doesn't match. Try again or ask your manager." };
+  if (throttleError || !attemptId) {
+    return { error: userFacingError(throttleError, "La connexion est indisponible pour le moment. Réessayez dans un instant.") };
   }
+
+  const matches = candidates.filter((candidate) => verifyPin(pin, candidate.pin_hash));
+
+  if (matches.length === 0) {
+    return { error: "Ce PIN est incorrect. Réessayez ou demandez à votre responsable." };
+  }
+
+  // Two active accounts in one role sharing a PIN (possible after a
+  // reactivation) would be indistinguishable: refuse rather than sign in as
+  // whoever happens to come first.
+  if (matches.length > 1) {
+    return { error: "Ce PIN est utilisé par plusieurs comptes. Demandez à votre responsable de le changer." };
+  }
+
+  const [match] = matches;
+
+  await admin.rpc("complete_staff_login_attempt", { p_attempt_id: attemptId });
 
   const cookieStore = await cookies();
   cookieStore.set(
@@ -88,10 +137,10 @@ export async function staffLogin(
       staffId: match.id,
       restaurantId: restaurant.id,
       branchId: match.branch_id,
-      role: role as "waiter" | "kitchen" | "cashier",
+      role,
       name: match.name,
     }),
-    { httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: 60 * 60 * 12 },
+    { httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: STAFF_SESSION_MAX_AGE_SECONDS },
   );
 
   redirect(ROLE_HOME[role]);

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { LoginForm } from "@/components/auth/login-form";
 
-export const metadata: Metadata = { title: "Sign in — Servio" };
+export const metadata: Metadata = { title: "Connexion — Servio" };
 
 export default function LoginPage() {
   return (
