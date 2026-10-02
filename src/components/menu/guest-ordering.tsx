@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { placeOrder, type TableOrder } from "@/app/actions/orders";
-import type { MenuItemForCart } from "@/components/menu/add-to-cart-dialog";
 import { useCart } from "@/components/menu/cart-provider";
-import { lineTotal } from "@/lib/cart-types";
+import { lineTotal, type MenuItemForCart } from "@/lib/cart-types";
 import { formatCurrency } from "@/lib/currency";
 import { ORDER_STATUS_LABEL } from "@/lib/labels";
 

@@ -30,7 +30,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { listTableOrders, type TableOrder } from "@/app/actions/orders";
 import { listTableRequests, requestWaiterAssistance, type TableRequest } from "@/app/actions/waiter-requests";
 import { requestDetail, requestPhase, requestTitle } from "@/lib/request-status";
-import type { MenuItemForCart } from "@/components/menu/add-to-cart-dialog";
+import type { MenuItemForCart } from "@/lib/cart-types";
 import {
   CartScreen,
   DishOrderPanel,
