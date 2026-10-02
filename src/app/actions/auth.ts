@@ -6,7 +6,15 @@ import type { AuthError } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 
-export type AuthActionState = { error: string | null; notice?: string | null };
+export type AuthActionState = {
+  error: string | null;
+  notice?: string | null;
+  /**
+   * What was typed, sent back on error: React resets a form after its action
+   * runs, which would otherwise wipe the e-mail after a wrong password.
+   */
+  values?: { email?: string; fullName?: string };
+};
 
 /** Supabase Auth answers in English; show owners a French message instead. */
 const AUTH_ERROR_FR: Record<string, string> = {
@@ -45,7 +53,7 @@ export async function signUpOwner(
   });
 
   if (error) {
-    return { error: authErrorMessage(error) };
+    return { error: authErrorMessage(error), values: { email, fullName } };
   }
 
   // With "Confirm email" enabled (the Supabase default), signUp creates the
@@ -73,7 +81,7 @@ export async function signInOwner(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: authErrorMessage(error) };
+    return { error: authErrorMessage(error), values: { email } };
   }
 
   redirect("/dashboard");
