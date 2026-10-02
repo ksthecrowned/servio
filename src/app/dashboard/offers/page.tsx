@@ -29,7 +29,7 @@ export default async function OffersPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Offres</h1>
-          <p className="text-muted-foreground">Créez des réductions simples en XAF et gérez leur période d'activation.</p>
+          <p className="text-muted-foreground">Créez des réductions simples en XAF et gérez leur période d’activation.</p>
         </div>
         <Dialog>
           <DialogTrigger asChild><Button>Nouvelle offre</Button></DialogTrigger>
@@ -49,7 +49,7 @@ export default async function OffersPage() {
                 <Badge variant={offer.is_active ? "brand" : "outline"}>{offer.is_active ? "Active" : "Inactive"}</Badge>
                 <Dialog>
                   <DialogTrigger asChild><Button variant="outline" size="sm">Modifier</Button></DialogTrigger>
-                  <DialogContent><DialogHeader><DialogTitle>Modifier l'offre</DialogTitle></DialogHeader><OfferForm offer={offer} /></DialogContent>
+                  <DialogContent><DialogHeader><DialogTitle>Modifier l’offre</DialogTitle></DialogHeader><OfferForm offer={offer} /></DialogContent>
                 </Dialog>
               </div>
             </div>

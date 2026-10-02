@@ -89,7 +89,7 @@ export default async function AnalyticsPage() {
   const couponOrders = billable.filter((order) => order.coupon_id);
   const discountGiven = couponOrders.reduce((sum, order) => sum + money(order.discount_amount), 0);
   const couponRevenue = couponOrders.reduce((sum, order) => sum + money(order.total_amount), 0);
-  const couponRows = (coupons ?? []) as CouponRow[];
+  const couponRows = (coupons ?? []) as unknown as CouponRow[];
 
   return (
     <div className="flex flex-col gap-6">
