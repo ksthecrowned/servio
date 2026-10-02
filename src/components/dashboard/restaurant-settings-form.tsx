@@ -31,6 +31,8 @@ export function RestaurantSettingsForm({
   });
   const [logoUrl, setLogoUrl] = useState(restaurant.logo_url);
   const [coverUrl, setCoverUrl] = useState(restaurant.cover_image_url);
+  // After a failed save, keep what was typed rather than the saved profile.
+  const values = state.values;
 
   return (
     <form action={formAction} className="flex max-w-xl flex-col gap-4">
@@ -64,15 +66,15 @@ export function RestaurantSettingsForm({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">Nom du restaurant</Label>
-        <Input id="name" name="name" defaultValue={restaurant.name} required />
+        <Input id="name" name="name" defaultValue={values?.name ?? restaurant.name} required />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="phone">Téléphone</Label>
-        <Input id="phone" name="phone" defaultValue={restaurant.phone ?? ""} />
+        <Input id="phone" name="phone" defaultValue={values?.phone ?? restaurant.phone ?? ""} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="description">Description</Label>
-        <Input id="description" name="description" defaultValue={restaurant.description ?? ""} />
+        <Input id="description" name="description" defaultValue={values?.description ?? restaurant.description ?? ""} />
       </div>
       <div className="flex gap-4">
         <div className="flex flex-col gap-1.5">
@@ -83,7 +85,7 @@ export function RestaurantSettingsForm({
             type="number"
             step="0.01"
             min="0"
-            defaultValue={restaurant.tax_percent}
+            defaultValue={values?.taxPercent ?? restaurant.tax_percent}
             className="w-28"
           />
         </div>
@@ -95,7 +97,7 @@ export function RestaurantSettingsForm({
             type="number"
             step="0.01"
             min="0"
-            defaultValue={restaurant.service_charge_percent}
+            defaultValue={values?.serviceChargePercent ?? restaurant.service_charge_percent}
             className="w-28"
           />
         </div>

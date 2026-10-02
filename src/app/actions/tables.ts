@@ -2,11 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 
+import { formValues, type FormValues } from "@/lib/form-values";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
-export type TableActionState = { error: string | null };
+const FIELDS = ["branchId", "label"] as const;
+
+export type TableActionState = {
+  error: string | null;
+  /** What was typed, sent back on error so the form keeps it. */
+  values?: FormValues<(typeof FIELDS)[number]>;
+};
 
 export async function addTable(
   _prevState: TableActionState,
@@ -14,9 +21,10 @@ export async function addTable(
 ): Promise<TableActionState> {
   const branchId = String(formData.get("branchId") ?? "");
   const label = String(formData.get("label") ?? "").trim();
+  const values = formValues(formData, FIELDS);
 
   if (!branchId || !label) {
-    return { error: "La succursale et le nom de la table sont obligatoires." };
+    return { error: "La succursale et le nom de la table sont obligatoires.", values };
   }
 
   await requireCurrentRestaurant();
@@ -25,10 +33,10 @@ export async function addTable(
   const { error } = await supabase.from("restaurant_tables").insert({ branch_id: branchId, label });
 
   if (error?.code === "23505") {
-    return { error: `Une table « ${label} » existe déjà dans cette succursale.` };
+    return { error: `Une table « ${label} » existe déjà dans cette succursale.`, values };
   }
   if (error) {
-    return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+    return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), values };
   }
 
   revalidatePath("/dashboard/tables");

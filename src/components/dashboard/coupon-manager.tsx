@@ -43,6 +43,7 @@ export function CouponManager({ offerId, coupons }: { offerId: string; coupons: 
           className="h-8 w-36 font-mono uppercase"
           maxLength={20}
           required
+          defaultValue={state.values?.code}
         />
         <Input
           name="usage_limit"
@@ -52,6 +53,7 @@ export function CouponManager({ offerId, coupons }: { offerId: string; coupons: 
           placeholder="Limite (option.)"
           aria-label="Nombre d’utilisations maximum"
           className="h-8 w-36"
+          defaultValue={state.values?.usage_limit}
         />
         <Button type="submit" size="sm" disabled={isPending}>
           {isPending ? "Ajout…" : "Ajouter"}

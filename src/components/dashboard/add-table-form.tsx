@@ -14,10 +14,14 @@ export function AddTableForm({ branches }: { branches: { id: string; name: strin
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="branchId">Succursale</Label>
+        {/* A select only applies defaultValue when it mounts: the key remounts it
+            so that the form reset after an action shows the returned value. */}
         <select
+          key={state.values?.branchId}
           id="branchId"
           name="branchId"
           required
+          defaultValue={state.values?.branchId}
           className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
         >
           {branches.map((branch) => (
@@ -29,7 +33,14 @@ export function AddTableForm({ branches }: { branches: { id: string; name: strin
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="label">Nom de la table</Label>
-        <Input id="label" name="label" placeholder="Table 05" required className="w-40" />
+        <Input
+          id="label"
+          name="label"
+          placeholder="Table 05"
+          required
+          className="w-40"
+          defaultValue={state.values?.label}
+        />
       </div>
       <Button type="submit" disabled={isPending}>
         {isPending ? "Ajout…" : "Ajouter la table"}

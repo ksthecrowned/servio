@@ -45,8 +45,13 @@ export function EditMenuItemDialog({
   const [state, formAction, isPending] = useActionState(updateMenuItem, initialState);
   const [open, setOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(item.image_url);
+  // The action state outlives the dialog: remember the one it was opened with
+  // so a reopened dialog starts from the saved item, not an earlier attempt.
+  const [openedWith, setOpenedWith] = useState(state);
+  const current = state === openedWith ? initialState : state;
+  const values = current.values;
 
-  if (state.savedAt && open) {
+  if (current.savedAt && open) {
     setOpen(false);
   }
 
@@ -55,7 +60,10 @@ export function EditMenuItemDialog({
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (nextOpen) setImageUrl(item.image_url);
+        if (nextOpen) {
+          setImageUrl(item.image_url);
+          setOpenedWith(state);
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -92,10 +100,13 @@ export function EditMenuItemDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={`edit-category-${item.id}`}>Catégorie</Label>
+              {/* A select only applies defaultValue when it mounts: the key remounts it
+                  so that the form reset after an action shows the returned value. */}
               <select
+                key={values?.categoryId ?? item.category_id}
                 id={`edit-category-${item.id}`}
                 name="categoryId"
-                defaultValue={item.category_id}
+                defaultValue={values?.categoryId ?? item.category_id}
                 required
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
@@ -115,7 +126,7 @@ export function EditMenuItemDialog({
                 type="number"
                 min="0"
                 step="1"
-                defaultValue={item.base_price}
+                defaultValue={values?.basePrice ?? item.base_price}
                 required
               />
             </div>
@@ -123,7 +134,7 @@ export function EditMenuItemDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor={`edit-name-${item.id}`}>Nom</Label>
-            <Input id={`edit-name-${item.id}`} name="name" defaultValue={item.name} required />
+            <Input id={`edit-name-${item.id}`} name="name" defaultValue={values?.name ?? item.name} required />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -131,7 +142,7 @@ export function EditMenuItemDialog({
             <textarea
               id={`edit-description-${item.id}`}
               name="description"
-              defaultValue={item.description ?? ""}
+              defaultValue={values?.description ?? item.description ?? ""}
               rows={3}
               placeholder="Décrivez brièvement le plat, ses ingrédients ou sa particularité."
               className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-[3px]"
@@ -140,14 +151,19 @@ export function EditMenuItemDialog({
 
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="isVeg" defaultChecked={item.is_veg} className="size-4" />
+              <input
+                type="checkbox"
+                name="isVeg"
+                defaultChecked={values ? values.isVeg === "on" : item.is_veg}
+                className="size-4"
+              />
               Végétarien
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 name="isBestseller"
-                defaultChecked={item.is_bestseller}
+                defaultChecked={values ? values.isBestseller === "on" : item.is_bestseller}
                 className="size-4"
               />
               Best-seller
@@ -156,14 +172,14 @@ export function EditMenuItemDialog({
               <input
                 type="checkbox"
                 name="isAvailable"
-                defaultChecked={item.is_available}
+                defaultChecked={values ? values.isAvailable === "on" : item.is_available}
                 className="size-4"
               />
               Disponible
             </label>
           </div>
 
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {current.error ? <p className="text-sm text-destructive">{current.error}</p> : null}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

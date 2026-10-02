@@ -2,13 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 
+import { formValues, type FormValues } from "@/lib/form-values";
 import { ROLE_LABEL } from "@/lib/labels";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { hashPin, verifyPin } from "@/lib/staff-pin";
 import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
-export type StaffActionState = { error: string | null };
+/** Echoed back on error. The PIN is left out on purpose: never send it back. */
+const FIELDS = ["name", "role", "branchId"] as const;
+
+export type StaffActionState = {
+  error: string | null;
+  /** What was typed, sent back on error so the form keeps it. */
+  values?: FormValues<(typeof FIELDS)[number]>;
+};
 
 /**
  * PIN accounts are for floor roles only.
@@ -34,14 +42,15 @@ export async function addStaff(
   const name = String(formData.get("name") ?? "").trim();
   const role = String(formData.get("role") ?? "");
   const pin = String(formData.get("pin") ?? "");
+  const values = formValues(formData, FIELDS);
 
-  if (!name) return { error: "Indiquez le nom." };
-  if (!isStaffRole(role)) return { error: "Choisissez un rôle valide." };
+  if (!name) return { error: "Indiquez le nom.", values };
+  if (!isStaffRole(role)) return { error: "Choisissez un rôle valide.", values };
 
   // Exactly 4 digits: the staff login keypad (PRD section 7's ● ● ● ●) is a
   // fixed 4-dot pad, so a longer PIN would be impossible to type in.
   if (!/^\d{4}$/.test(pin)) {
-    return { error: "Le PIN doit comporter exactement 4 chiffres." };
+    return { error: "Le PIN doit comporter exactement 4 chiffres.", values };
   }
 
   const restaurant = await requireCurrentRestaurant();
@@ -62,6 +71,7 @@ export async function addStaff(
   if (clash) {
     return {
       error: `${clash.name} utilise déjà ce PIN pour le rôle ${ROLE_LABEL[role]}. Choisissez-en un autre.`,
+      values,
     };
   }
 
@@ -73,7 +83,7 @@ export async function addStaff(
     pin_hash: hashPin(pin),
   });
 
-  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), values };
 
   revalidatePath("/dashboard/staff");
   return { error: null };

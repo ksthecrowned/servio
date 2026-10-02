@@ -24,15 +24,31 @@ export function CreateRestaurantForm() {
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="name">Nom du restaurant</Label>
-            <Input id="name" name="name" placeholder="Chez Mama Ngoma" required />
+            <Input
+              id="name"
+              name="name"
+              placeholder="Chez Mama Ngoma"
+              required
+              defaultValue={state.values?.name}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="branchName">Nom de la première succursale</Label>
-            <Input id="branchName" name="branchName" placeholder="Succursale principale" />
+            <Input
+              id="branchName"
+              name="branchName"
+              placeholder="Succursale principale"
+              defaultValue={state.values?.branchName}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cuisineType">Type de cuisine</Label>
-            <Input id="cuisineType" name="cuisineType" placeholder="Congolaise, boulangerie, fast-food…" />
+            <Input
+              id="cuisineType"
+              name="cuisineType"
+              placeholder="Congolaise, boulangerie, fast-food…"
+              defaultValue={state.values?.cuisineType}
+            />
           </div>
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" disabled={isPending}>

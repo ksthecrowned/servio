@@ -2,11 +2,30 @@
 
 import { revalidatePath } from "next/cache";
 
+import { formValues, type FormValues } from "@/lib/form-values";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
-export type OfferActionState = { error: string | null; savedAt?: number };
+const OFFER_FIELDS = [
+  "name",
+  "type",
+  "percentage_value",
+  "flat_value",
+  "min_order_value",
+  "max_discount_value",
+  "starts_on",
+  "ends_on",
+  "is_active",
+] as const;
+const COUPON_FIELDS = ["code", "usage_limit"] as const;
+
+export type OfferActionState = {
+  error: string | null;
+  savedAt?: number;
+  /** What was typed, sent back on error so the form keeps it. */
+  values?: FormValues<(typeof OFFER_FIELDS)[number] | (typeof COUPON_FIELDS)[number]>;
+};
 
 const OFFER_TYPES = ["percentage", "flat", "bogo", "combo", "happy_hour"] as const;
 type OfferType = (typeof OFFER_TYPES)[number];
@@ -75,9 +94,13 @@ export async function createOffer(
 ): Promise<OfferActionState> {
   const restaurant = await requireCurrentRestaurant();
   const parsed = readOffer(formData);
-  if (!parsed.ok) return { error: parsed.error };
+  const values = formValues(formData, OFFER_FIELDS);
+  if (!parsed.ok) return { error: parsed.error, values };
   if (!ORDERABLE_TYPES.includes(parsed.values.type)) {
-    return { error: "Seules les réductions en pourcentage ou en montant fixe sont disponibles pour l’instant." };
+    return {
+      error: "Seules les réductions en pourcentage ou en montant fixe sont disponibles pour l’instant.",
+      values,
+    };
   }
 
   const supabase = await createClient();
@@ -85,7 +108,7 @@ export async function createOffer(
     .from("offers")
     .insert({ restaurant_id: restaurant.restaurantId, ...parsed.values });
 
-  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), values };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }
@@ -97,8 +120,9 @@ export async function updateOffer(
   const restaurant = await requireCurrentRestaurant();
   const id = String(formData.get("id") ?? "");
   const parsed = readOffer(formData);
-  if (!id) return { error: "Offre introuvable." };
-  if (!parsed.ok) return { error: parsed.error };
+  const values = formValues(formData, OFFER_FIELDS);
+  if (!id) return { error: "Offre introuvable.", values };
+  if (!parsed.ok) return { error: parsed.error, values };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -107,7 +131,7 @@ export async function updateOffer(
     .eq("id", id)
     .eq("restaurant_id", restaurant.restaurantId);
 
-  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), values };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }
@@ -128,12 +152,13 @@ export async function createCoupon(
   const restaurant = await requireCurrentRestaurant();
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
   const usageLimit = nullableNumber(formData.get("usage_limit"));
+  const values = formValues(formData, COUPON_FIELDS);
 
   if (!COUPON_CODE.test(code)) {
-    return { error: "Le code doit faire 3 à 20 caractères : lettres, chiffres, - ou _." };
+    return { error: "Le code doit faire 3 à 20 caractères : lettres, chiffres, - ou _.", values };
   }
   if (usageLimit !== null && (!Number.isInteger(usageLimit) || usageLimit < 1)) {
-    return { error: "La limite d’utilisation doit être un nombre entier positif." };
+    return { error: "La limite d’utilisation doit être un nombre entier positif.", values };
   }
 
   const supabase = await createClient();
@@ -143,7 +168,7 @@ export async function createCoupon(
     .eq("id", offerId)
     .eq("restaurant_id", restaurant.restaurantId)
     .maybeSingle();
-  if (!offer) return { error: "Offre introuvable." };
+  if (!offer) return { error: "Offre introuvable.", values };
 
   const { error } = await supabase.from("coupons").insert({
     restaurant_id: restaurant.restaurantId,
@@ -152,8 +177,8 @@ export async function createCoupon(
     usage_limit: usageLimit,
   });
 
-  if (error?.code === "23505") return { error: `Le code ${code} existe déjà.` };
-  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+  if (error?.code === "23505") return { error: `Le code ${code} existe déjà.`, values };
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), values };
   revalidatePath("/dashboard/offers");
   return { error: null, savedAt: Date.now() };
 }

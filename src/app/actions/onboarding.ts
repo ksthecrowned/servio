@@ -3,10 +3,17 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { formValues, type FormValues } from "@/lib/form-values";
 import { slugify } from "@/lib/slug";
 import { userFacingError } from "@/lib/supabase/errors";
 
-export type OnboardingState = { error: string | null };
+const FIELDS = ["name", "branchName", "cuisineType"] as const;
+
+export type OnboardingState = {
+  error: string | null;
+  /** What was typed, sent back on error so the form keeps it. */
+  values?: FormValues<(typeof FIELDS)[number]>;
+};
 
 export async function createRestaurant(
   _prevState: OnboardingState,
@@ -16,8 +23,10 @@ export async function createRestaurant(
   const branchName = String(formData.get("branchName") ?? "").trim() || "Succursale principale";
   const cuisineType = String(formData.get("cuisineType") ?? "").trim() || null;
 
+  const values = formValues(formData, FIELDS);
+
   if (!name) {
-    return { error: "Indiquez le nom du restaurant." };
+    return { error: "Indiquez le nom du restaurant.", values };
   }
 
   const supabase = await createClient();
@@ -42,7 +51,10 @@ export async function createRestaurant(
   });
 
   if (error) {
-    return { error: userFacingError(error, "Impossible de créer le restaurant. Réessayez.") };
+    return {
+      error: userFacingError(error, "Impossible de créer le restaurant. Réessayez."),
+      values,
+    };
   }
 
   redirect("/dashboard");

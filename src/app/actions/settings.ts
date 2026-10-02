@@ -2,11 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 
+import { formValues, type FormValues } from "@/lib/form-values";
 import { requireCurrentRestaurant } from "@/lib/restaurant";
 import { userFacingError } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
-export type SettingsActionState = { error: string | null; success: boolean };
+const FIELDS = ["name", "phone", "description", "taxPercent", "serviceChargePercent"] as const;
+
+export type SettingsActionState = {
+  error: string | null;
+  success: boolean;
+  /** What was typed, sent back on error so the form keeps it. */
+  values?: FormValues<(typeof FIELDS)[number]>;
+};
 
 export async function updateRestaurantProfile(
   _prevState: SettingsActionState,
@@ -19,13 +27,18 @@ export async function updateRestaurantProfile(
   const serviceChargePercent = Number(formData.get("serviceChargePercent") ?? 0);
   const logoUrl = String(formData.get("logoUrl") ?? "").trim() || null;
   const coverImageUrl = String(formData.get("coverImageUrl") ?? "").trim() || null;
+  const values = formValues(formData, FIELDS);
   if (!name) {
-    return { error: "Indiquez le nom du restaurant.", success: false };
+    return { error: "Indiquez le nom du restaurant.", success: false, values };
   }
 
   for (const percent of [taxPercent, serviceChargePercent]) {
     if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
-      return { error: "La taxe et les frais de service doivent être compris entre 0 et 100 %.", success: false };
+      return {
+        error: "La taxe et les frais de service doivent être compris entre 0 et 100 %.",
+        success: false,
+        values,
+      };
     }
   }
 
@@ -46,7 +59,11 @@ export async function updateRestaurantProfile(
     .eq("id", restaurant.restaurantId);
 
   if (error) {
-    return { error: userFacingError(error, "Une erreur est survenue. Réessayez."), success: false };
+    return {
+      error: userFacingError(error, "Une erreur est survenue. Réessayez."),
+      success: false,
+      values,
+    };
   }
 
   revalidatePath("/dashboard/settings");

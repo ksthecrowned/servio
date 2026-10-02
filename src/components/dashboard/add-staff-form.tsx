@@ -14,14 +14,25 @@ export function AddStaffForm({ branches }: { branches: { id: string; name: strin
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="staffName">Nom</Label>
-        <Input id="staffName" name="name" placeholder="Grâce" required className="w-40" />
+        <Input
+          id="staffName"
+          name="name"
+          placeholder="Grâce"
+          required
+          className="w-40"
+          defaultValue={state.values?.name}
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="role">Rôle</Label>
+        {/* A select only applies defaultValue when it mounts: the key remounts it
+            so that the form reset after an action shows the returned value. */}
         <select
+          key={state.values?.role}
           id="role"
           name="role"
           required
+          defaultValue={state.values?.role}
           className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
         >
           <option value="waiter">Serveur</option>
@@ -32,8 +43,10 @@ export function AddStaffForm({ branches }: { branches: { id: string; name: strin
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="branchId">Succursale</Label>
         <select
+          key={state.values?.branchId}
           id="branchId"
           name="branchId"
+          defaultValue={state.values?.branchId}
           className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
         >
           {branches.map((branch) => (

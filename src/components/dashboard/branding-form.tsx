@@ -28,12 +28,11 @@ export function BrandingForm({
 
   const [templateId, setTemplateId] = useState(current?.template_id ?? templates[0]?.id ?? "");
   const [color, setColor] = useState(current?.primary_color ?? "#C2410C");
-  const [font, setFont] = useState(current?.font_family ?? "sans");
+  const font = state.values?.fontFamily ?? current?.font_family ?? "sans";
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <input type="hidden" name="templateId" value={templateId} />
-      <input type="hidden" name="fontFamily" value={font} />
 
       <div className="flex flex-col gap-3">
         <Label>Modèle du menu</Label>
@@ -93,10 +92,15 @@ export function BrandingForm({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="font">Police</Label>
+          {/* Uncontrolled: React resets the form after the action, and a
+              controlled select would then show the first option while still
+              holding the chosen one. A select only applies defaultValue when
+              it mounts, so the key remounts it on the value to show. */}
           <select
+            key={font}
             id="font"
-            value={font}
-            onChange={(e) => setFont(e.target.value)}
+            name="fontFamily"
+            defaultValue={font}
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
           >
             <option value="sans">Sans empattement (moderne)</option>
