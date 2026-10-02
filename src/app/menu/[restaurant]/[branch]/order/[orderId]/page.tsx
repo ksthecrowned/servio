@@ -16,7 +16,7 @@ export default async function OrderTrackingPage(
     .from("orders")
     .select(
       `id, order_number, status, subtotal, discount_amount, tax_amount, service_charge_amount, total_amount, created_at,
-       restaurants!inner(name, slug), branches!inner(name, slug),
+       restaurants!inner(name, slug), branches!orders_branch_id_fkey!inner(name, slug),
        order_items(id, item_name, variant_name, unit_price, quantity, addon_selection)`,
     )
     .eq("id", orderId)

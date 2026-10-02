@@ -34,7 +34,7 @@ export async function getMenuData(restaurantSlug: string, branchSlug: string) {
     .from("menu_categories")
     .select(
       `id, name, sort_order,
-       menu_items(
+       menu_items!menu_items_category_id_fkey(
          id, name, description, image_url, base_price, is_veg, is_bestseller, is_available,
          menu_variants(id, name, price, is_default, sort_order),
          menu_addons(id, name, price, sort_order)

@@ -12,7 +12,7 @@ export default async function KitchenPage() {
   let query = admin
     .from("orders")
     .select(
-      "id, order_number, status, order_items(id, item_name, quantity), table_sessions(restaurant_tables(label))",
+      "id, order_number, status, order_items(id, item_name, quantity), table_sessions!orders_table_session_id_fkey(restaurant_tables!table_sessions_table_id_fkey(label))",
     )
     .eq("restaurant_id", session.restaurantId)
     .in("status", ["pending", "accepted", "preparing"])

@@ -11,7 +11,7 @@ export default async function OrdersPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, order_number, status, total_amount, created_at, branches(name)")
+    .select("id, order_number, status, total_amount, created_at, branches!orders_branch_id_fkey(name)")
     .eq("restaurant_id", restaurant.restaurantId)
     .order("created_at", { ascending: false })
     .limit(50);

@@ -11,7 +11,7 @@ export default async function CashierPage() {
 
   let query = admin
     .from("bills")
-    .select("id, total_amount, table_sessions(restaurant_tables(label))")
+    .select("id, total_amount, table_sessions!bills_table_session_id_fkey(restaurant_tables!table_sessions_table_id_fkey(label))")
     .neq("status", "paid")
     .eq("restaurant_id", session.restaurantId)
     .order("created_at");

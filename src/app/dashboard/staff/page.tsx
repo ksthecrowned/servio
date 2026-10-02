@@ -19,7 +19,7 @@ export default async function StaffPage() {
     supabase.from("branches").select("id, name").eq("restaurant_id", restaurant.restaurantId),
     supabase
       .from("staff")
-      .select("id, name, role, is_active, branches(name)")
+      .select("id, name, role, is_active, branches!staff_branch_id_fkey(name)")
       .eq("restaurant_id", restaurant.restaurantId)
       .order("created_at", { ascending: false }),
   ]);

@@ -26,7 +26,7 @@ export default async function WaiterPage() {
       .order("label"),
     admin
       .from("waiter_requests")
-      .select("id, type, note, created_at, acknowledged_at, assigned_staff_id, table_id, restaurant_tables(label)")
+      .select("id, type, note, created_at, acknowledged_at, assigned_staff_id, table_id, restaurant_tables!waiter_requests_table_id_fkey(label)")
       .in("branch_id", branchIds.length > 0 ? branchIds : ["00000000-0000-0000-0000-000000000000"])
       .is("resolved_at", null)
       .order("created_at"),
