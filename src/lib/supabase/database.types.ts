@@ -1139,6 +1139,7 @@ export type Database = {
       };
       restaurant_tables: {
         Row: {
+          assigned_staff_id: string | null;
           branch_id: string;
           created_at: string;
           id: string;
@@ -1147,6 +1148,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          assigned_staff_id?: string | null;
           branch_id: string;
           created_at?: string;
           id?: string;
@@ -1155,6 +1157,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          assigned_staff_id?: string | null;
           branch_id?: string;
           created_at?: string;
           id?: string;
@@ -1163,6 +1166,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_assigned_staff_id_fkey";
+            columns: ["assigned_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "restaurant_tables_branch_id_fkey";
             columns: ["branch_id"];

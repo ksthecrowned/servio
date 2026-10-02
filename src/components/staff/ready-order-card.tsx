@@ -10,8 +10,11 @@ type OrderItem = { id: string; item_name: string; variant_name: string | null; q
 
 export function ReadyOrderCard({
   order,
+  note = null,
 }: {
   order: { id: string; order_number: number; tableLabel: string | null; order_items: OrderItem[] };
+  /** Context shown under the title, e.g. whose table it is. */
+  note?: string | null;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -24,6 +27,7 @@ export function ReadyOrderCard({
         <span className="text-xs text-muted-foreground">#{order.order_number}</span>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
+        {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
         <ul className="text-sm">
           {order.order_items.map((item) => (
             <li key={item.id}>

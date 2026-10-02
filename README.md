@@ -15,7 +15,8 @@ product spec: [`docs/PRD.md`](docs/PRD.md).
 
 - 📱 **QR-first digital menu** — no app install, scan and order
 - 🧑‍🍳 **Live kitchen display** — pending → accepted → preparing → ready
-- 🔔 **Waiter call & bill requests** from the table, in real time-ish
+- 🔔 **Waiter call & bill requests** from the table, routed to the table's waiter
+- 🧭 **Table assignment** — each table has a waiter; sound and browser alerts on staff screens
 - 🧾 **Cashier flow** — bill creation and Mobile Money payment recording
 - 🎨 **Templates & branding** — 11 menu templates, brand colour, custom fonts
 - 👥 **Role-based staff access** — waiter / kitchen / cashier PIN login
@@ -75,6 +76,7 @@ applied in filename order:
 | `20261002000002_staff_login_throttle` | Staff PIN sign-in throttling |
 | `20261002000003_onboarding_trial` | Atomic `create_restaurant`, automatic 14-day trial, XAF plan prices |
 | `20261002000004_french_display_names` | French template names and default branch name |
+| `20261002000005_table_waiters` | Waiter assigned to each table, kept consistent when staff change |
 
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.
@@ -218,11 +220,13 @@ Storage RLS keys off the first path segment (`<restaurant_id>/…`), so one
 restaurant cannot overwrite another's images — verified against a real
 Postgres instance, including malformed paths.
 
-**Templates & branding** (`src/lib/templates.ts`, `/dashboard/branding`): 11
-seeded templates (3 free, 8 premium) change only presentation — layout,
-typography, image shape — never menu data, per PRD §32. The owner's brand
-colour is applied by overriding the `--brand` CSS custom property for the menu
-subtree, so existing `bg-brand`/`text-brand` utilities follow automatically.
+**Templates & branding** (`/dashboard/branding`, `src/lib/guest-theme.ts`,
+`src/app/menu/guest.css`): 11 seeded templates (3 free, 8 premium) change only
+presentation — surfaces, typography, rules, image shapes — never menu data,
+per PRD §32. The guest menu layout reads the restaurant's branding and sets
+`data-template` / `data-font` on the menu wrapper, plus the brand colour as
+`--primary` with a text colour picked for contrast; every guest page (menu,
+cart, order tracking) follows it.
 Premium templates are gated, in the form and in the server action: locked on
 Starter or once the trial has ended, open during the trial (PRD §48 gives
 trials Business-level features).
@@ -242,9 +246,27 @@ automated yet: a platform admin moves a restaurant to a paid plan. Plan
 prices follow the PRD §47 XAF hypothesis (5,000 / 10,000 / 20,000 XAF).
 
 **Order lifecycle** is closed end to end: kitchen drives pending → accepted →
-preparing → ready, the waiter's "Ready to serve" queue takes ready → served,
-and the cashier recording payment completes every open order on the table
-session and frees the table. Each transition writes to `order_status_history`.
+preparing → ready, the waiter's "À servir" queue takes ready → served, and the
+cashier recording payment completes every open order on the table session,
+closes the guest's bill request and frees the table. Each transition writes
+to `order_status_history`.
+
+**Tables & waiters** (`/dashboard/tables`, `src/lib/waiter-floor.ts`): the
+owner gives each table a waiter. A waiter's screen shows their tables first;
+requests and ready orders of their tables — and of tables without a waiter —
+are theirs, colleagues' tables are listed separately so they can help.
+Requests more than 3 minutes old escalate to every waiter. The database only
+accepts an active waiter of the table's branch, and a waiter who is
+deactivated, changes role or moves branch releases their tables and the
+requests they were holding.
+
+**Staff alerts** (`src/components/staff/staff-alerts.tsx`): kitchen (new
+order, 3 beeps), waiters (requests, ready orders, late requests, 2 beeps) and
+cashier (bill, 1 beep) get a sound, a vibration, a browser notification and a
+count in the tab title for anything new, once alerts are switched on by a tap
+(browsers require it). They work while the screen is open, including in a
+background tab; alerts with the phone locked are left to the planned native
+app.
 
 **Payment** (Congo-first): cash, Mobile Money and card, with manual confirmation in the current release. Automated Mobile Money collection is intentionally provider-agnostic and can be added when a supported local provider/aggregator is connected.
 
@@ -262,7 +284,7 @@ first need a real auth/token mechanism for them.
 Deliberately not built yet (see PRD §53–56 for the phased roadmap):
 
 - True websocket Realtime (see above — currently short-interval polling)
-- Push notifications / sound alerts
+- Push notifications with the screen closed or the phone locked (planned native app)
 - Self-serve billing: choosing and paying for a plan after the trial (an
   admin changes the subscription for now)
 - Offer rules beyond percentage/flat: BOGO, combos, happy hours, weekday or

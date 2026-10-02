@@ -142,6 +142,9 @@ do $$ begin
 end $$;
 
 -- 6. Payment: branch scoping, then one payment, everything closed.
+insert into waiter_requests (branch_id, table_id, type) values
+  ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'bill'),
+  ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'water');
 select pg_temp.expect_error($q$
   select mark_bill_paid('90000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
   '72000000-0000-0000-0000-000000000001', 'cash', p_branch_id => '20000000-0000-0000-0000-000000000002')
@@ -163,6 +166,9 @@ do $$ begin
   assert (select count(*) from order_status_history where status = 'completed') = 2;
   assert (select status from table_sessions) = 'closed';
   assert (select status from restaurant_tables where label = 'T1') = 'cleaning';
+  assert (select resolved_at is not null and resolved_by_staff_id is not null from waiter_requests where type = 'bill'),
+    'bill request still open after payment';
+  assert (select resolved_at is null from waiter_requests where type = 'water'), 'payment resolved an unrelated request';
 end $$;
 
 -- 7. The next guests at the table get a new session.

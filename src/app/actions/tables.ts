@@ -34,3 +34,34 @@ export async function addTable(
   revalidatePath("/dashboard/tables");
   return { error: null };
 }
+
+/**
+ * Assigns a table to a waiter (or clears it with null). The database checks
+ * the waiter is active and works in the table's branch.
+ */
+export async function assignTableWaiter(
+  tableId: string,
+  staffId: string | null,
+): Promise<TableActionState> {
+  const restaurant = await requireCurrentRestaurant();
+  const supabase = await createClient();
+
+  const { data: table } = await supabase
+    .from("restaurant_tables")
+    .select("id, branches!inner(restaurant_id)")
+    .eq("id", tableId)
+    .eq("branches.restaurant_id", restaurant.restaurantId)
+    .maybeSingle();
+
+  if (!table) return { error: "Table introuvable." };
+
+  const { error } = await supabase
+    .from("restaurant_tables")
+    .update({ assigned_staff_id: staffId })
+    .eq("id", tableId);
+
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+
+  revalidatePath("/dashboard/tables");
+  return { error: null };
+}

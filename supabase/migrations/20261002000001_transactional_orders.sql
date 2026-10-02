@@ -348,6 +348,16 @@ begin
   returning table_id into v_table_id;
 
   update restaurant_tables set status = 'cleaning' where id = v_table_id;
+
+  -- The guest's "bill please" is answered by the payment: don't leave it
+  -- open on the waiters' screens.
+  update waiter_requests
+  set resolved_at = now(),
+      resolved_by_staff_id = p_staff_id,
+      acknowledged_at = coalesce(acknowledged_at, now())
+  where table_id = v_table_id
+    and type = 'bill'
+    and resolved_at is null;
 end;
 $$;
 
