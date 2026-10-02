@@ -71,10 +71,12 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
     if (pin.length === PIN_LENGTH && role) formRef.current?.requestSubmit();
   }, [pin, role]);
 
-  // Wrong PIN: clear the pad so the next attempt starts clean.
-  const [lastError, setLastError] = useState(state.error);
-  if (state.error !== lastError) {
-    setLastError(state.error);
+  // Wrong PIN: clear the pad so the next attempt starts clean. Compare the
+  // state object, not the message: two wrong PINs in a row return the same
+  // text, and the pad must still be cleared the second time.
+  const [lastState, setLastState] = useState(state);
+  if (state !== lastState) {
+    setLastState(state);
     if (state.error) setPin("");
   }
 

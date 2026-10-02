@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 
 import { AddStaffForm } from "@/components/dashboard/add-staff-form";
+import { StaffActiveToggle } from "@/components/dashboard/staff-active-toggle";
 import { StaffLoginCard } from "@/components/dashboard/staff-login-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +29,10 @@ export default async function StaffPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">Staff</h1>
-        <p className="text-muted-foreground">Waiters, kitchen and cashier accounts sign in with a role + PIN.</p>
+        <p className="text-muted-foreground">
+          Waiters, kitchen and cashier accounts sign in with a role + PIN. Deactivating someone
+          signs them out immediately.
+        </p>
       </div>
 
       <Card>
@@ -80,6 +84,7 @@ export default async function StaffPage() {
                   {member.role}
                 </Badge>
                 {!member.is_active && <Badge variant="destructive">Inactive</Badge>}
+                <StaffActiveToggle staffId={member.id} isActive={member.is_active} />
               </div>
             </div>
           ))}

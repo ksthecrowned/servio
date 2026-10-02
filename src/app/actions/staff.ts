@@ -76,3 +76,27 @@ export async function addStaff(
   revalidatePath("/dashboard/staff");
   return { error: null };
 }
+
+/**
+ * Deactivating a staff member signs them out everywhere at once:
+ * requireStaffSession re-checks is_active on every request.
+ *
+ * Reactivation cannot check for a PIN clash the way addStaff does (only
+ * salted hashes are stored), so staffLogin refuses a PIN that matches more
+ * than one active account instead of guessing who it is.
+ */
+export async function setStaffActive(staffId: string, isActive: boolean): Promise<StaffActionState> {
+  const restaurant = await requireCurrentRestaurant();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("staff")
+    .update({ is_active: isActive })
+    .eq("id", staffId)
+    .eq("restaurant_id", restaurant.restaurantId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/staff");
+  return { error: null };
+}

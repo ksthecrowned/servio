@@ -1,15 +1,19 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { signStaffSession, STAFF_SESSION_COOKIE } from "@/lib/staff-session";
+import {
+  signStaffSession,
+  STAFF_SESSION_COOKIE,
+  STAFF_SESSION_MAX_AGE_SECONDS,
+  type StaffRole,
+} from "@/lib/staff-session";
 import { verifyPin } from "@/lib/staff-pin";
+import { userFacingError } from "@/lib/supabase/errors";
 
 export type StaffLoginState = { error: string | null };
-
-type StaffRole = "waiter" | "kitchen" | "cashier";
 
 const ROLE_HOME: Record<StaffRole, string> = {
   waiter: "/staff/waiter",
@@ -19,6 +23,21 @@ const ROLE_HOME: Record<StaffRole, string> = {
 
 function isStaffRole(value: string): value is StaffRole {
   return Object.hasOwn(ROLE_HOME, value);
+}
+
+/**
+ * Client IP for sign-in throttling. On Vercel the first x-forwarded-for
+ * entry is set by the platform and cannot be spoofed; behind another proxy
+ * make sure it overwrites the header. If it is spoofable, only the per-IP
+ * limit is weakened — the per-role limit still applies.
+ */
+async function clientIp(): Promise<string> {
+  const headerStore = await headers();
+  return (
+    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip")?.trim() ||
+    "unknown"
+  );
 }
 
 /**
@@ -81,11 +100,34 @@ export async function staffLogin(
     return { error: `No ${role} accounts set up yet. Ask your manager to add you.` };
   }
 
-  const match = candidates.find((candidate) => verifyPin(pin, candidate.pin_hash));
+  // Recorded before the PIN is checked, so parallel guesses are counted
+  // too; refused once the restaurant/device has too many recent failures.
+  const { data: attemptId, error: throttleError } = await admin.rpc("begin_staff_login_attempt", {
+    p_restaurant_id: restaurant.id,
+    p_role: role,
+    p_ip: await clientIp(),
+  });
 
-  if (!match) {
+  if (throttleError || !attemptId) {
+    return { error: userFacingError(throttleError, "Sign-in is unavailable right now. Try again shortly.") };
+  }
+
+  const matches = candidates.filter((candidate) => verifyPin(pin, candidate.pin_hash));
+
+  if (matches.length === 0) {
     return { error: "That PIN doesn't match. Try again or ask your manager." };
   }
+
+  // Two active accounts in one role sharing a PIN (possible after a
+  // reactivation) would be indistinguishable: refuse rather than sign in as
+  // whoever happens to come first.
+  if (matches.length > 1) {
+    return { error: "This PIN is used by more than one account. Ask your manager to change it." };
+  }
+
+  const [match] = matches;
+
+  await admin.rpc("complete_staff_login_attempt", { p_attempt_id: attemptId });
 
   const cookieStore = await cookies();
   cookieStore.set(
@@ -97,7 +139,7 @@ export async function staffLogin(
       role,
       name: match.name,
     }),
-    { httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: 60 * 60 * 12 },
+    { httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: STAFF_SESSION_MAX_AGE_SECONDS },
   );
 
   redirect(ROLE_HOME[role]);
