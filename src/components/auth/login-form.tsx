@@ -15,27 +15,27 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Sign in to Servio</CardTitle>
-        <CardDescription>Manage your restaurant from one dashboard.</CardDescription>
+        <CardTitle>Connexion à Servio</CardTitle>
+        <CardDescription>Gérez votre restaurant depuis un seul tableau de bord.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <Input id="email" name="email" type="email" required autoComplete="email" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Input id="password" name="password" type="password" required autoComplete="current-password" />
           </div>
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Signing in…" : "Sign in"}
+            {isPending ? "Connexion…" : "Se connecter"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            New to Servio?{" "}
+            Nouveau sur Servio ?{" "}
             <Link href="/signup" className="text-foreground underline underline-offset-4">
-              Create an account
+              Créer un compte
             </Link>
           </p>
         </form>

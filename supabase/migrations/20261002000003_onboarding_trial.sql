@@ -85,13 +85,13 @@ declare
   v_restaurant_id uuid;
 begin
   if v_user_id is null then
-    raise exception 'You need to be signed in to create a restaurant.';
+    raise exception 'Vous devez être connecté pour créer un restaurant.';
   end if;
   if nullif(btrim(p_name), '') is null then
-    raise exception 'Restaurant name is required.';
+    raise exception 'Indiquez le nom du restaurant.';
   end if;
   if exists (select 1 from restaurant_members where user_id = v_user_id) then
-    raise exception 'You already have a restaurant.';
+    raise exception 'Vous avez déjà un restaurant.';
   end if;
 
   begin
@@ -99,7 +99,7 @@ begin
     values (v_user_id, p_slug, btrim(p_name), nullif(btrim(coalesce(p_cuisine_type, '')), ''))
     returning id into v_restaurant_id;
   exception when unique_violation then
-    raise exception 'That restaurant address is already taken. Try another name.';
+    raise exception 'Cette adresse de restaurant est déjà prise. Essayez un autre nom.';
   end;
 
   insert into restaurant_members (restaurant_id, user_id, role)

@@ -5,6 +5,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { FeedbackForm } from "@/components/menu/feedback-form";
 import { OrderStatusStepper } from "@/components/menu/order-status-stepper";
 import { Badge } from "@/components/ui/badge";
+import { ORDER_STATUS_LABEL } from "@/lib/labels";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function OrderTrackingPage(
@@ -48,8 +49,8 @@ export default async function OrderTrackingPage(
 
       <div className="pt-6 text-center">
         <p className="text-sm text-muted-foreground">{restaurant?.name}</p>
-        <h1 className="text-2xl font-semibold">Commande #{order.order_number}</h1>
-        <Badge className="mt-2 capitalize">{order.status}</Badge>
+        <h1 className="text-2xl font-semibold">Commande n° {order.order_number}</h1>
+        <Badge className="mt-2">{ORDER_STATUS_LABEL[order.status]}</Badge>
       </div>
 
       <div className="rounded-lg border p-4">

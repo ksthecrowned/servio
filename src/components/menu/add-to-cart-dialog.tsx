@@ -98,7 +98,7 @@ export function AddToCartDialog({
 
         {item.menu_variants.length > 0 && (
           <div className="flex flex-col gap-2">
-            <Label>Size / variant</Label>
+            <Label>Taille / variante</Label>
             <div className="flex flex-wrap gap-2">
               {item.menu_variants.map((variant) => (
                 <button
@@ -119,7 +119,7 @@ export function AddToCartDialog({
 
         {item.menu_addons.length > 0 && (
           <div className="flex flex-col gap-2">
-            <Label>Add-ons</Label>
+            <Label>Suppléments</Label>
             <div className="flex flex-col gap-1.5">
               {item.menu_addons.map((addon) => (
                 <label key={addon.id} className="flex items-center gap-2 text-sm">
@@ -137,17 +137,17 @@ export function AddToCartDialog({
         )}
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="instructions">Special instructions</Label>
+          <Label htmlFor="instructions">Instructions particulières</Label>
           <Input
             id="instructions"
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            placeholder="Less spicy, no onions…"
+            placeholder="Moins pimenté, sans oignons…"
           />
         </div>
 
         <div className="flex items-center justify-between">
-          <Label>Quantity</Label>
+          <Label>Quantité</Label>
           <div className="flex items-center gap-3">
             <Button
               type="button"
@@ -166,7 +166,7 @@ export function AddToCartDialog({
 
         <DialogFooter>
           <Button onClick={handleAdd} className="w-full">
-            Add to cart · {formatCurrency(total)}
+            Ajouter au panier · {formatCurrency(total)}
           </Button>
         </DialogFooter>
       </DialogContent>

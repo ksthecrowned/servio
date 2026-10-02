@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { SUBSCRIPTION_STATUS_LABEL } from "@/lib/labels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,13 +14,13 @@ export default async function AdminSubscriptionsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Subscriptions</h1>
-        <p className="text-muted-foreground">Starter, Business and Pro subscriptions.</p>
+        <h1 className="text-2xl font-semibold">Abonnements</h1>
+        <p className="text-muted-foreground">Abonnements Starter, Business et Pro.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">All subscriptions</CardTitle>
+          <CardTitle className="text-base">Tous les abonnements</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {(subscriptions ?? []).map((sub) => (
@@ -32,11 +33,13 @@ export default async function AdminSubscriptionsPage() {
                   {(sub.subscription_plans as unknown as { name: string } | null)?.name}
                 </p>
               </div>
-              <Badge variant={sub.status === "active" ? "brand" : "outline"}>{sub.status}</Badge>
+              <Badge variant={sub.status === "active" ? "brand" : "outline"}>
+                {SUBSCRIPTION_STATUS_LABEL[sub.status]}
+              </Badge>
             </div>
           ))}
           {(!subscriptions || subscriptions.length === 0) && (
-            <p className="text-sm text-muted-foreground">No subscriptions yet.</p>
+            <p className="text-sm text-muted-foreground">Aucun abonnement pour l’instant.</p>
           )}
         </CardContent>
       </Card>

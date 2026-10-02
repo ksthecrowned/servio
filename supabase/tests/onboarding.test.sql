@@ -63,18 +63,18 @@ end $$;
 
 -- 3. One restaurant per account (the dashboard only handles one).
 select pg_temp.expect_error($q$ select create_restaurant('chez-a-2', 'Chez A bis', 'Main') $q$,
-  'You already have a restaurant.');
+  'Vous avez déjà un restaurant.');
 
 -- 4. Taken slug: a clear message, and nothing left behind.
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
 select pg_temp.expect_error($q$ select create_restaurant('chez-a', 'Chez B', 'Main') $q$,
-  'That restaurant address is already taken. Try another name.');
+  'Cette adresse de restaurant est déjà prise. Essayez un autre nom.');
 do $$ begin
   assert not exists (select 1 from restaurant_members where user_id = '00000000-0000-0000-0000-00000000000b'),
     'failed onboarding left a membership behind';
 end $$;
 select pg_temp.expect_error($q$ select create_restaurant('chez-b', '   ', 'Main') $q$,
-  'Restaurant name is required.');
+  'Indiquez le nom du restaurant.');
 
 -- 5. Signed-out visitors cannot call it at all.
 reset role;

@@ -13,15 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Servio — One QR. Your entire restaurant connected.",
+  title: "Servio — Un QR. Tout votre restaurant connecté.",
   description:
-    "Servio is a QR-first restaurant operating system: digital menu, ordering, kitchen display, staff notifications and analytics in one SaaS.",
+    "Servio est le système de gestion de restaurant centré sur le QR code : menu digital, commandes, écran cuisine, notifications du personnel et statistiques dans un seul outil.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

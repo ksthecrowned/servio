@@ -20,16 +20,16 @@ export default async function AdminOverviewPage() {
 
   const stats = [
     { label: "Restaurants", value: restaurants ?? 0 },
-    { label: "Active Subscriptions", value: activeSubs ?? 0 },
-    { label: "Trials", value: trials ?? 0 },
-    { label: "Total Orders", value: orders ?? 0 },
+    { label: "Abonnements actifs", value: activeSubs ?? 0 },
+    { label: "Essais en cours", value: trials ?? 0 },
+    { label: "Commandes au total", value: orders ?? 0 },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Platform overview</h1>
-        <p className="text-muted-foreground">Servio across every restaurant on the platform.</p>
+        <h1 className="text-2xl font-semibold">Vue d’ensemble de la plateforme</h1>
+        <p className="text-muted-foreground">Servio, tous restaurants confondus.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

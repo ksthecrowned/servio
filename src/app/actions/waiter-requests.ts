@@ -16,7 +16,7 @@ export async function requestWaiterAssistance(
   note?: string,
 ): Promise<{ error: string | null }> {
   if (!isWaiterRequestType(type)) {
-    return { error: "Invalid request type." };
+    return { error: "Type de demande invalide." };
   }
 
   const admin = createAdminClient();
@@ -29,7 +29,7 @@ export async function requestWaiterAssistance(
     .maybeSingle();
 
   if (!table) {
-    return { error: "Table not found." };
+    return { error: "Table introuvable." };
   }
 
   const { error } = await admin.from("waiter_requests").insert({

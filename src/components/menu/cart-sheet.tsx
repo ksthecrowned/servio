@@ -57,7 +57,7 @@ export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Your order</DialogTitle>
+          <DialogTitle>Votre commande</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
@@ -101,43 +101,44 @@ export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                     onClick={() => removeLine(line.key)}
                     className="ml-2 text-xs text-muted-foreground underline"
                   >
-                    Remove
+                    Retirer
                   </button>
                 </div>
               </div>
               <p className="font-medium">{formatCurrency(lineTotal(line))}</p>
             </div>
           ))}
-          {lines.length === 0 && <p className="text-sm text-muted-foreground">Your cart is empty.</p>}
+          {lines.length === 0 && <p className="text-sm text-muted-foreground">Votre panier est vide.</p>}
         </div>
 
         {lines.length > 0 && (
           <>
             <div className="flex items-center justify-between border-t pt-3 font-medium">
-              <span>Subtotal</span>
+              <span>Sous-total</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Tax, service charge and any coupon discount are applied when you place the order.
+              Les taxes, les frais de service et la réduction éventuelle sont appliqués à l’envoi de la
+              commande.
             </p>
 
             <div className="flex flex-col gap-3 border-t pt-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="couponCode">Coupon code (optional)</Label>
+                <Label htmlFor="couponCode">Code promo (facultatif)</Label>
                 <Input
                   id="couponCode"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder="WEEKEND20"
+                  placeholder="MIDI20"
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex flex-1 flex-col gap-1.5">
-                  <Label htmlFor="customerName">Name (optional)</Label>
+                  <Label htmlFor="customerName">Nom (facultatif)</Label>
                   <Input id="customerName" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                 </div>
                 <div className="flex flex-1 flex-col gap-1.5">
-                  <Label htmlFor="customerPhone">Mobile (optional)</Label>
+                  <Label htmlFor="customerPhone">Téléphone (facultatif)</Label>
                   <Input
                     id="customerPhone"
                     value={customerPhone}
@@ -151,7 +152,7 @@ export function CartSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
             <Button onClick={handlePlaceOrder} disabled={isPending} className="w-full">
-              {isPending ? "Placing order…" : "Place order"}
+              {isPending ? "Envoi de la commande…" : "Commander"}
             </Button>
           </>
         )}

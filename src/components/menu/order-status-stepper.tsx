@@ -1,16 +1,16 @@
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { status: "pending", label: "Received" },
-  { status: "accepted", label: "Accepted" },
-  { status: "preparing", label: "Preparing" },
-  { status: "ready", label: "Ready" },
-  { status: "served", label: "Served" },
+  { status: "pending", label: "Reçue" },
+  { status: "accepted", label: "Acceptée" },
+  { status: "preparing", label: "En préparation" },
+  { status: "ready", label: "Prête" },
+  { status: "served", label: "Servie" },
 ];
 
 export function OrderStatusStepper({ status }: { status: string }) {
   if (status === "cancelled") {
-    return <p className="text-sm font-medium text-destructive">This order was cancelled.</p>;
+    return <p className="text-sm font-medium text-destructive">Cette commande a été annulée.</p>;
   }
 
   const currentIndex = STEPS.findIndex((s) => s.status === status);

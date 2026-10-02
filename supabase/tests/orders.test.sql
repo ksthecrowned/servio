@@ -86,42 +86,42 @@ end $$;
 -- 2. Coupon limits and offer rules.
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1}]', p_coupon_code => 'ONCE')
-$q$, 'This coupon has reached its usage limit.');
+$q$, 'Ce code promo a atteint sa limite d’utilisation.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1}]', p_coupon_code => 'BOGO')
-$q$, 'This coupon cannot be used for online orders yet.');
+$q$, 'Ce code promo ne peut pas encore être utilisé pour une commande en ligne.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1}]', p_coupon_code => 'OLD')
-$q$, 'This coupon''s offer is no longer active.');
+$q$, 'L’offre de ce code promo n’est plus active.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1}]', p_coupon_code => 'NOPE')
-$q$, 'Invalid coupon code.');
+$q$, 'Code promo invalide.');
 
 -- 3. A failing line rolls back the whole order, coupon usage included.
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1},
       {"item_id": "60000000-0000-0000-0000-000000000002", "quantity": 1}]', p_coupon_code => 'MANY')
-$q$, 'Saka-saka is currently sold out.');
+$q$, '« Saka-saka » n’est plus disponible pour le moment.');
 do $$ begin
   assert (select times_used from coupons where code = 'MANY') = 0, 'coupon counted for a failed order';
   assert (select count(*) from orders) = 1, 'failed order left rows behind';
 end $$;
 
 -- 4. Input validation.
-select pg_temp.expect_error($q$ select place_order('chez-r', 'main', '[]') $q$, 'Cart is empty.');
+select pg_temp.expect_error($q$ select place_order('chez-r', 'main', '[]') $q$, 'Votre panier est vide.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "not-a-uuid", "quantity": 1}]')
-$q$, 'Invalid cart.');
+$q$, 'Panier invalide.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 0}]')
-$q$, 'Invalid quantity.');
+$q$, 'Quantité invalide.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'main', '[{"item_id": "60000000-0000-0000-0000-000000000001", "addon_ids": ["62000000-0000-0000-0000-000000000003"], "quantity": 1}]')
-$q$, 'Invalid add-on selected.');
+$q$, 'Supplément invalide.');
 select pg_temp.expect_error($q$
   select place_order('chez-r', 'b2', '[{"item_id": "60000000-0000-0000-0000-000000000001", "quantity": 1}]',
   p_table_id => '30000000-0000-0000-0000-000000000001')
-$q$, 'Table not found.');
+$q$, 'Table introuvable.');
 
 -- 5. Ordering again after the bill was requested reuses the session and
 --    keeps the bill total current.
@@ -145,7 +145,7 @@ end $$;
 select pg_temp.expect_error($q$
   select mark_bill_paid('90000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
   '72000000-0000-0000-0000-000000000001', 'cash', p_branch_id => '20000000-0000-0000-0000-000000000002')
-$q$, 'Bill not found.');
+$q$, 'Addition introuvable.');
 
 select mark_bill_paid('90000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
   '72000000-0000-0000-0000-000000000001', 'mobile_money', p_branch_id => '20000000-0000-0000-0000-000000000001');
@@ -153,7 +153,7 @@ select mark_bill_paid('90000000-0000-0000-0000-000000000001', '10000000-0000-000
 select pg_temp.expect_error($q$
   select mark_bill_paid('90000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
   '72000000-0000-0000-0000-000000000001', 'cash')
-$q$, 'This bill has already been paid.');
+$q$, 'Cette addition a déjà été réglée.');
 
 do $$ begin
   assert (select count(*) from payments) = 1, 'expected exactly one payment';

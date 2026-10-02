@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const OPTIONS = [
-  { value: "call_waiter", label: "Call waiter" },
-  { value: "water", label: "Water" },
-  { value: "cutlery", label: "Cutlery" },
-  { value: "bill", label: "Request bill" },
-  { value: "other", label: "Other" },
+  { value: "call_waiter", label: "Appeler un serveur" },
+  { value: "water", label: "De l’eau" },
+  { value: "cutlery", label: "Des couverts" },
+  { value: "bill", label: "L’addition" },
+  { value: "other", label: "Autre" },
 ];
 
 export function WaiterRequestButton({ branchId, tableId }: { branchId: string; tableId: string }) {
@@ -43,10 +43,10 @@ export function WaiterRequestButton({ branchId, tableId }: { branchId: string; t
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Need something?</DialogTitle>
+            <DialogTitle>Besoin de quelque chose ?</DialogTitle>
           </DialogHeader>
           {sent ? (
-            <p className="text-sm text-brand">Request sent — staff have been notified.</p>
+            <p className="text-sm text-brand">Demande envoyée : l’équipe a été prévenue.</p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {OPTIONS.map((option) => (

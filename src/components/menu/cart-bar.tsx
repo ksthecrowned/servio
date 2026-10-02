@@ -21,9 +21,9 @@ export function CartBar() {
           className="flex w-full items-center justify-between px-4 py-6 text-base shadow-lg"
         >
           <span>
-            {itemCount} item{itemCount > 1 ? "s" : ""}
+            {itemCount} article{itemCount > 1 ? "s" : ""}
           </span>
-          <span>View cart · {formatCurrency(subtotal)}</span>
+          <span>Voir le panier · {formatCurrency(subtotal)}</span>
         </Button>
       </div>
       <CartSheet open={open} onOpenChange={setOpen} />

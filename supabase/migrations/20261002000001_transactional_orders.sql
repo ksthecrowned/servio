@@ -68,22 +68,22 @@ declare
   v_order_number bigint;
 begin
   if p_lines is null or jsonb_typeof(p_lines) <> 'array' or jsonb_array_length(p_lines) = 0 then
-    raise exception 'Cart is empty.';
+    raise exception 'Votre panier est vide.';
   end if;
   if jsonb_array_length(p_lines) > 100 then
-    raise exception 'Too many items in one order.';
+    raise exception 'Trop d’articles dans une seule commande.';
   end if;
 
   select * into v_restaurant from restaurants where slug = p_restaurant_slug;
   if not found or v_restaurant.status <> 'active' then
-    raise exception 'Restaurant not found.';
+    raise exception 'Restaurant introuvable.';
   end if;
 
   select id into v_branch_id
   from branches
   where restaurant_id = v_restaurant.id and slug = p_branch_slug and is_active;
   if not found then
-    raise exception 'Branch not found.';
+    raise exception 'Succursale introuvable.';
   end if;
 
   if p_table_id is not null then
@@ -95,7 +95,7 @@ begin
     where id = p_table_id and branch_id = v_branch_id
     for update;
     if not found then
-      raise exception 'Table not found.';
+      raise exception 'Table introuvable.';
     end if;
   end if;
 
@@ -110,21 +110,21 @@ begin
         into v_addon_ids
         from jsonb_array_elements_text(coalesce(v_line -> 'addon_ids', '[]'::jsonb));
     exception when others then
-      raise exception 'Invalid cart.';
+      raise exception 'Panier invalide.';
     end;
 
     if v_quantity is null or v_quantity < 1 or v_quantity > 50 then
-      raise exception 'Invalid quantity.';
+      raise exception 'Quantité invalide.';
     end if;
 
     select * into v_item
     from menu_items
     where id = v_item_id and restaurant_id = v_restaurant.id;
     if not found then
-      raise exception 'One of the items in your cart is no longer available.';
+      raise exception 'Un des plats de votre panier n’est plus disponible.';
     end if;
     if not v_item.is_available then
-      raise exception '% is currently sold out.', v_item.name;
+      raise exception '« % » n’est plus disponible pour le moment.', v_item.name;
     end if;
 
     v_unit_price := v_item.base_price;
@@ -132,7 +132,7 @@ begin
     if v_variant_id is not null then
       select * into v_variant from menu_variants where id = v_variant_id and item_id = v_item.id;
       if not found then
-        raise exception 'Invalid variant selected.';
+        raise exception 'Variante invalide.';
       end if;
       v_unit_price := v_variant.price;
     end if;
@@ -145,7 +145,7 @@ begin
     where a.item_id = v_item.id and a.id = any (v_addon_ids);
 
     if jsonb_array_length(v_addons) <> cardinality(v_addon_ids) then
-      raise exception 'Invalid add-on selected.';
+      raise exception 'Supplément invalide.';
     end if;
 
     v_instructions := nullif(left(btrim(coalesce(v_line ->> 'special_instructions', '')), 300), '');
@@ -171,20 +171,20 @@ begin
     where restaurant_id = v_restaurant.id and code = upper(btrim(p_coupon_code))
     for update;
     if not found or not v_coupon.is_active or v_coupon.offer_id is null then
-      raise exception 'Invalid coupon code.';
+      raise exception 'Code promo invalide.';
     end if;
     if v_coupon.usage_limit is not null and v_coupon.times_used >= v_coupon.usage_limit then
-      raise exception 'This coupon has reached its usage limit.';
+      raise exception 'Ce code promo a atteint sa limite d’utilisation.';
     end if;
 
     select * into v_offer from offers where id = v_coupon.offer_id;
     if not found or not v_offer.is_active
        or (v_offer.starts_on is not null and local_today < v_offer.starts_on)
        or (v_offer.ends_on is not null and local_today > v_offer.ends_on) then
-      raise exception 'This coupon''s offer is no longer active.';
+      raise exception 'L’offre de ce code promo n’est plus active.';
     end if;
     if v_offer.min_order_value is not null and v_subtotal < v_offer.min_order_value then
-      raise exception 'Minimum order value for this coupon is % XAF.',
+      raise exception 'Ce code promo nécessite une commande d’au moins % FCFA.',
         to_char(v_offer.min_order_value, 'FM999G999G990');
     end if;
 
@@ -195,7 +195,7 @@ begin
     else
       -- bogo / combo / happy_hour have no pricing rules yet: refuse the
       -- coupon rather than accept it and silently give no discount.
-      raise exception 'This coupon cannot be used for online orders yet.';
+      raise exception 'Ce code promo ne peut pas encore être utilisé pour une commande en ligne.';
     end if;
 
     if v_offer.max_discount_value is not null then
@@ -300,7 +300,7 @@ declare
   v_table_id uuid;
 begin
   if p_method not in ('cash', 'mobile_money', 'card') then
-    raise exception 'Invalid payment method.';
+    raise exception 'Mode de paiement invalide.';
   end if;
 
   -- Row lock: a double click or two cashiers cannot both record a payment.
@@ -311,10 +311,10 @@ begin
     and (p_branch_id is null or branch_id = p_branch_id)
   for update;
   if not found then
-    raise exception 'Bill not found.';
+    raise exception 'Addition introuvable.';
   end if;
   if v_bill.status = 'paid' then
-    raise exception 'This bill has already been paid.';
+    raise exception 'Cette addition a déjà été réglée.';
   end if;
 
   -- Charge what the session actually ordered, not a total captured when

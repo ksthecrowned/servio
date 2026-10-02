@@ -64,7 +64,7 @@ begin
       and not succeeded
       and created_at > now() - interval '15 minutes'
   ) >= 5 then
-    raise exception 'Too many incorrect PINs from this device. Wait 15 minutes or ask your manager.';
+    raise exception 'Trop de PIN incorrects depuis cet appareil. Patientez 15 minutes ou demandez à votre responsable.';
   end if;
 
   if (
@@ -74,7 +74,7 @@ begin
       and not succeeded
       and created_at > now() - interval '1 hour'
   ) >= 20 then
-    raise exception 'Sign-in for this role is paused after too many incorrect PINs. Try again later or ask your manager.';
+    raise exception 'Connexion suspendue pour ce rôle après trop de PIN incorrects. Réessayez plus tard ou demandez à votre responsable.';
   end if;
 
   insert into staff_login_attempts (restaurant_id, role, ip)

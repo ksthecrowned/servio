@@ -19,7 +19,7 @@ export function ReadyOrderCard({
     <Card className="border-brand/50">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base">
-          {order.tableLabel ? `Table ${order.tableLabel}` : `Order #${order.order_number}`}
+          {order.tableLabel ? `Table ${order.tableLabel}` : `Commande n° ${order.order_number}`}
         </CardTitle>
         <span className="text-xs text-muted-foreground">#{order.order_number}</span>
       </CardHeader>
@@ -37,7 +37,7 @@ export function ReadyOrderCard({
           disabled={isPending}
           onClick={() => startTransition(() => markOrderServed(order.id))}
         >
-          {isPending ? "Updating…" : "Mark served"}
+          {isPending ? "Mise à jour…" : "Marquer servie"}
         </Button>
       </CardContent>
     </Card>

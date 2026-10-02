@@ -26,7 +26,7 @@ select begin_staff_login_attempt('10000000-0000-0000-0000-000000000001', 'waiter
 from generate_series(1, 5);
 select pg_temp.expect_error($q$
   select begin_staff_login_attempt('10000000-0000-0000-0000-000000000001', 'waiter', '198.51.100.1')
-$q$, 'Too many incorrect PINs from this device. Wait 15 minutes or ask your manager.');
+$q$, 'Trop de PIN incorrects depuis cet appareil. Patientez 15 minutes ou demandez à votre responsable.');
 
 do $$ begin
   -- Refused attempts are not recorded, so the lockout cannot be extended.
@@ -56,7 +56,7 @@ select begin_staff_login_attempt('10000000-0000-0000-0000-000000000001', 'cashie
 from generate_series(1, 20) as n;
 select pg_temp.expect_error($q$
   select begin_staff_login_attempt('10000000-0000-0000-0000-000000000001', 'cashier', '203.0.113.200')
-$q$, 'Sign-in for this role is paused after too many incorrect PINs. Try again later or ask your manager.');
+$q$, 'Connexion suspendue pour ce rôle après trop de PIN incorrects. Réessayez plus tard ou demandez à votre responsable.');
 do $$ begin
   perform begin_staff_login_attempt('10000000-0000-0000-0000-000000000001', 'waiter', '203.0.113.200');
 end $$;

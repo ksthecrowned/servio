@@ -40,3 +40,24 @@ export const OFFER_TYPE_LABEL: Record<Enums<"offer_type">, string> = {
   combo: "Combo",
   happy_hour: "Happy hour",
 };
+
+export const RESTAURANT_STATUS_LABEL: Record<Enums<"restaurant_status">, string> = {
+  active: "Actif",
+  suspended: "Suspendu",
+  closed: "Fermé",
+};
+
+export const SUBSCRIPTION_STATUS_LABEL: Record<Enums<"subscription_status">, string> = {
+  trialing: "Essai",
+  active: "Actif",
+  past_due: "Paiement en retard",
+  cancelled: "Résilié",
+  expired: "Expiré",
+};
+
+export const PAYMENT_STATUS_LABEL: Record<Enums<"payment_status">, string> = {
+  pending: "En attente",
+  paid: "Payé",
+  failed: "Échoué",
+  refunded: "Remboursé",
+};

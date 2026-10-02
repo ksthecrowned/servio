@@ -233,5 +233,5 @@ export async function markBillPaid(
   });
 
   revalidatePath("/staff/cashier");
-  return { error: error ? userFacingError(error, "Could not record the payment.") : null };
+  return { error: error ? userFacingError(error, "Impossible d’enregistrer le paiement. Réessayez.") : null };
 }

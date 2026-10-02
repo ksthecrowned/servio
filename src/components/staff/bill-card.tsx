@@ -16,9 +16,9 @@ type Bill = {
 };
 
 const METHODS = [
-  { value: "cash", label: "Cash" },
+  { value: "cash", label: "Espèces" },
   { value: "mobile_money", label: "Mobile Money" },
-  { value: "card", label: "Card" },
+  { value: "card", label: "Carte" },
 ] as const;
 
 export function BillCard({ bill }: { bill: Bill }) {
@@ -60,7 +60,7 @@ export function BillCard({ bill }: { bill: Bill }) {
           }
         >
           <Wallet className="size-4" />
-          {isPending ? "Saving…" : `Mark paid · ${METHODS.find((m) => m.value === method)?.label}`}
+          {isPending ? "Enregistrement…" : `Encaisser · ${METHODS.find((m) => m.value === method)?.label}`}
         </Button>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </CardContent>

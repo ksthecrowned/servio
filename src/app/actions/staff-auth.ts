@@ -10,6 +10,7 @@ import {
   STAFF_SESSION_MAX_AGE_SECONDS,
   type StaffRole,
 } from "@/lib/staff-session";
+import { ROLE_LABEL } from "@/lib/labels";
 import { verifyPin } from "@/lib/staff-pin";
 import { userFacingError } from "@/lib/supabase/errors";
 
@@ -42,13 +43,13 @@ async function clientIp(): Promise<string> {
 
 /**
  * Resolves a restaurant code to its display name, so the sign-in screen can
- * confirm "The Coffee House" before anyone starts tapping a PIN.
+ * confirm "Chez Mama Ngoma" before anyone starts tapping a PIN.
  */
 export async function lookupRestaurant(
   code: string,
 ): Promise<{ slug: string; name: string } | { error: string }> {
   const slug = code.trim().toLowerCase();
-  if (!slug) return { error: "Enter your restaurant code." };
+  if (!slug) return { error: "Saisissez le code de votre restaurant." };
 
   const admin = createAdminClient();
   const { data: restaurant } = await admin
@@ -58,7 +59,7 @@ export async function lookupRestaurant(
     .maybeSingle();
 
   if (!restaurant || restaurant.status !== "active") {
-    return { error: "No restaurant found with that code. Ask your manager to check it." };
+    return { error: "Aucun restaurant ne correspond à ce code. Demandez à votre responsable de le vérifier." };
   }
 
   return { slug: restaurant.slug, name: restaurant.name };
@@ -72,9 +73,9 @@ export async function staffLogin(
   const role = String(formData.get("role") ?? "");
   const pin = String(formData.get("pin") ?? "");
 
-  if (!restaurantSlug) return { error: "Enter your restaurant code." };
-  if (!isStaffRole(role)) return { error: "Choose your role." };
-  if (!/^\d{4}$/.test(pin)) return { error: "Enter your 4-digit PIN." };
+  if (!restaurantSlug) return { error: "Saisissez le code de votre restaurant." };
+  if (!isStaffRole(role)) return { error: "Choisissez votre rôle." };
+  if (!/^\d{4}$/.test(pin)) return { error: "Saisissez votre PIN à 4 chiffres." };
 
   const admin = createAdminClient();
 
@@ -86,7 +87,7 @@ export async function staffLogin(
     .maybeSingle();
 
   if (!restaurant) {
-    return { error: "No restaurant found with that code. Ask your manager to check it." };
+    return { error: "Aucun restaurant ne correspond à ce code. Demandez à votre responsable de le vérifier." };
   }
 
   const { data: candidates } = await admin
@@ -97,7 +98,7 @@ export async function staffLogin(
     .eq("is_active", true);
 
   if (!candidates || candidates.length === 0) {
-    return { error: `No ${role} accounts set up yet. Ask your manager to add you.` };
+    return { error: `Aucun compte ${ROLE_LABEL[role].toLowerCase()} n’existe encore. Demandez à votre responsable de vous ajouter.` };
   }
 
   // Recorded before the PIN is checked, so parallel guesses are counted
@@ -109,20 +110,20 @@ export async function staffLogin(
   });
 
   if (throttleError || !attemptId) {
-    return { error: userFacingError(throttleError, "Sign-in is unavailable right now. Try again shortly.") };
+    return { error: userFacingError(throttleError, "La connexion est indisponible pour le moment. Réessayez dans un instant.") };
   }
 
   const matches = candidates.filter((candidate) => verifyPin(pin, candidate.pin_hash));
 
   if (matches.length === 0) {
-    return { error: "That PIN doesn't match. Try again or ask your manager." };
+    return { error: "Ce PIN est incorrect. Réessayez ou demandez à votre responsable." };
   }
 
   // Two active accounts in one role sharing a PIN (possible after a
   // reactivation) would be indistinguishable: refuse rather than sign in as
   // whoever happens to come first.
   if (matches.length > 1) {
-    return { error: "This PIN is used by more than one account. Ask your manager to change it." };
+    return { error: "Ce PIN est utilisé par plusieurs comptes. Demandez à votre responsable de le changer." };
   }
 
   const [match] = matches;

@@ -31,7 +31,7 @@ export type PlaceOrderResult = { orderId: string; orderNumber: number } | { erro
  */
 export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult> {
   if (!input.lines || input.lines.length === 0) {
-    return { error: "Cart is empty." };
+    return { error: "Votre panier est vide." };
   }
 
   const admin = createAdminClient();
@@ -55,7 +55,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     .single();
 
   if (error || !data) {
-    return { error: userFacingError(error, "Could not place order.") };
+    return { error: userFacingError(error, "Impossible d’envoyer la commande. Réessayez.") };
   }
 
   return { orderId: data.order_id, orderNumber: data.order_number };

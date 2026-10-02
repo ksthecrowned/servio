@@ -17,7 +17,7 @@ export async function createRestaurant(
   const cuisineType = String(formData.get("cuisineType") ?? "").trim() || null;
 
   if (!name) {
-    return { error: "Restaurant name is required." };
+    return { error: "Indiquez le nom du restaurant." };
   }
 
   const supabase = await createClient();
@@ -42,7 +42,7 @@ export async function createRestaurant(
   });
 
   if (error) {
-    return { error: userFacingError(error, "Could not create restaurant.") };
+    return { error: userFacingError(error, "Impossible de créer le restaurant. Réessayez.") };
   }
 
   redirect("/dashboard");

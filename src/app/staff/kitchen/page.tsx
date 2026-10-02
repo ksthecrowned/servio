@@ -29,12 +29,12 @@ export default async function KitchenPage() {
       <AutoRefresh intervalMs={3000} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Kitchen</h1>
+          <h1 className="text-2xl font-semibold">Cuisine</h1>
           <p className="text-muted-foreground">{session.name}</p>
         </div>
         <form action={staffLogout}>
           <Button type="submit" variant="outline">
-            Sign out
+            Quitter
           </Button>
         </form>
       </div>
@@ -55,7 +55,7 @@ export default async function KitchenPage() {
           />
         ))}
         {(!orders || orders.length === 0) && (
-          <p className="text-sm text-muted-foreground">No active orders. New orders will appear here instantly.</p>
+          <p className="text-sm text-muted-foreground">Aucune commande en cours. Les nouvelles commandes s’afficheront ici aussitôt.</p>
         )}
       </div>
     </div>

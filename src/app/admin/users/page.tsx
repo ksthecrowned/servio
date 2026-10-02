@@ -8,13 +8,13 @@ export default async function AdminUsersPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <p className="text-muted-foreground">Everyone with a Servio account.</p>
+        <h1 className="text-2xl font-semibold">Utilisateurs</h1>
+        <p className="text-muted-foreground">Toutes les personnes ayant un compte Servio.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">All users</CardTitle>
+          <CardTitle className="text-base">Tous les utilisateurs</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {(data?.users ?? []).map((user) => (
@@ -22,13 +22,13 @@ export default async function AdminUsersPage() {
               <div>
                 <p className="font-medium">{user.email ?? user.phone ?? user.id}</p>
                 <p className="text-xs text-muted-foreground">
-                  Joined {new Date(user.created_at).toLocaleDateString()}
+                  Inscrit le {new Date(user.created_at).toLocaleDateString("fr-FR")}
                 </p>
               </div>
             </div>
           ))}
           {(!data?.users || data.users.length === 0) && (
-            <p className="text-sm text-muted-foreground">No users yet.</p>
+            <p className="text-sm text-muted-foreground">Aucun utilisateur pour l’instant.</p>
           )}
         </CardContent>
       </Card>

@@ -10,8 +10,8 @@ export default async function AdminTemplatesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Templates</h1>
-        <p className="text-muted-foreground">Menu templates available to restaurants.</p>
+        <h1 className="text-2xl font-semibold">Modèles</h1>
+        <p className="text-muted-foreground">Modèles de menu proposés aux restaurants.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -19,7 +19,7 @@ export default async function AdminTemplatesPage() {
           <Card key={template.id}>
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base">{template.name}</CardTitle>
-              {template.is_premium ? <Badge variant="brand">Premium</Badge> : <Badge variant="outline">Free</Badge>}
+              {template.is_premium ? <Badge variant="brand">Premium</Badge> : <Badge variant="outline">Gratuit</Badge>}
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">/{template.slug}</p>

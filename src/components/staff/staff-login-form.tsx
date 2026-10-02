@@ -11,9 +11,9 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 const ROLES = [
-  { value: "waiter", label: "Waiter", icon: HandPlatter },
-  { value: "kitchen", label: "Kitchen", icon: ChefHat },
-  { value: "cashier", label: "Cashier", icon: Wallet },
+  { value: "waiter", label: "Serveur", icon: HandPlatter },
+  { value: "kitchen", label: "Cuisine", icon: ChefHat },
+  { value: "cashier", label: "Caisse", icon: Wallet },
 ];
 
 const PIN_LENGTH = 4;
@@ -116,33 +116,33 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Set up this device</CardTitle>
+          <CardTitle>Configurer cet appareil</CardTitle>
           <CardDescription>
-            Enter your restaurant code once — this device will remember it.
+            Saisissez le code de votre restaurant une seule fois : cet appareil le retiendra.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="code">Restaurant code</Label>
+            <Label htmlFor="code">Code restaurant</Label>
             <Input
               id="code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}
-              placeholder="the-coffee-house-a3f9c1"
+              placeholder="chez-mama-ngoma-a3f9c1"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
             />
             <p className="text-xs text-muted-foreground">
-              Your manager can find this on the Staff page of the Servio dashboard.
+              Votre responsable le trouve sur la page Personnel du tableau de bord Servio.
             </p>
           </div>
 
           {lookupError ? <p className="text-sm text-destructive">{lookupError}</p> : null}
 
           <Button onClick={handleLookup} disabled={looking || !code.trim()}>
-            {looking ? "Checking…" : "Continue"}
+            {looking ? "Vérification…" : "Continuer"}
           </Button>
         </CardContent>
       </Card>
@@ -154,7 +154,7 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>{restaurant.name}</CardTitle>
-        <CardDescription>Choose your role and enter your PIN.</CardDescription>
+        <CardDescription>Choisissez votre rôle et saisissez votre PIN.</CardDescription>
       </CardHeader>
       <CardContent>
         <form ref={formRef} action={formAction} className="flex flex-col gap-5">
@@ -227,7 +227,7 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
                   disabled={isPending}
                   className="size-14"
                   onClick={() => setPin((p) => p.slice(0, -1))}
-                  aria-label="Delete last digit"
+                  aria-label="Effacer le dernier chiffre"
                 >
                   <Delete className="size-5" />
                 </Button>
@@ -235,13 +235,13 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
 
               {isPending ? (
                 <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" /> Signing in…
+                  <Loader2 className="size-4 animate-spin" /> Connexion…
                 </p>
               ) : null}
             </div>
           ) : (
             <p className="text-center text-sm text-muted-foreground">
-              Tap your role above to continue.
+              Touchez votre rôle ci-dessus pour continuer.
             </p>
           )}
 
@@ -254,7 +254,7 @@ export function StaffLoginForm({ defaultRestaurantSlug }: { defaultRestaurantSlu
             onClick={forgetRestaurant}
             className="text-center text-xs text-muted-foreground underline underline-offset-4"
           >
-            Not {restaurant.name}?
+            Ce n’est pas {restaurant.name} ?
           </button>
         </form>
       </CardContent>

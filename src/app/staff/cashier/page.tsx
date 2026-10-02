@@ -34,12 +34,12 @@ export default async function CashierPage() {
       <AutoRefresh intervalMs={5000} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Cashier</h1>
+          <h1 className="text-2xl font-semibold">Caisse</h1>
           <p className="text-muted-foreground">{session.name}</p>
         </div>
         <form action={staffLogout}>
           <Button type="submit" variant="outline">
-            Sign out
+            Quitter
           </Button>
         </form>
       </div>
@@ -48,7 +48,7 @@ export default async function CashierPage() {
         {cards.map((bill) => (
           <BillCard key={bill.id} bill={bill} />
         ))}
-        {cards.length === 0 && <p className="text-sm text-muted-foreground">No open bills.</p>}
+        {cards.length === 0 && <p className="text-sm text-muted-foreground">Aucune addition en attente.</p>}
       </div>
     </div>
   );
