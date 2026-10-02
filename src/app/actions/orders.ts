@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIp } from "@/lib/client-ip";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { userFacingError } from "@/lib/supabase/errors";
 import type { Enums } from "@/lib/supabase/types";
@@ -34,8 +35,24 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   if (!input.lines || input.lines.length === 0) {
     return { error: "Votre panier est vide." };
   }
+  // Orders come from a table's QR: that's what ties them to a session, a
+  // waiter and the rate limit below.
+  if (!input.tableId) {
+    return { error: "Scannez le QR code de votre table pour commander." };
+  }
 
   const admin = createAdminClient();
+
+  // Rate limit (per table and per device), recorded before the order so a
+  // burst of parallel requests is counted; given back if the order fails.
+  const { data: attemptId, error: limitError } = await admin.rpc("begin_guest_action", {
+    p_table_id: input.tableId,
+    p_ip: await clientIp(),
+    p_action: "order",
+  });
+  if (limitError || !attemptId) {
+    return { error: userFacingError(limitError, "Impossible d’envoyer la commande. Réessayez.") };
+  }
 
   const { data, error } = await admin
     .rpc("place_order", {
@@ -56,6 +73,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     .single();
 
   if (error || !data) {
+    await admin.rpc("cancel_guest_action", { p_id: attemptId });
     return { error: userFacingError(error, "Impossible d’envoyer la commande. Réessayez.") };
   }
 

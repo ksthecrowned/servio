@@ -17,7 +17,8 @@ product spec: [`docs/PRD.md`](docs/PRD.md).
 - 🧑‍🍳 **Live kitchen display** — pending → accepted → preparing → ready
 - 🔔 **Waiter call & bill requests** from the table, routed to the table's waiter
 - 🧭 **Table assignment** — each table has a waiter; sound and browser alerts on staff screens
-- 🧾 **Cashier flow** — bill creation and Mobile Money payment recording
+- 🧾 **Cashier flow** — bill creation and cash payment recording
+- ↩️ **Order cancellation** — by the guest before the kitchen accepts it, by the kitchen or the owner with a reason
 - 🎨 **Templates & branding** — 11 menu templates, brand colour, custom fonts
 - 👥 **Role-based staff access** — waiter / kitchen / cashier PIN login
 - 🏷️ **Offers & promo codes** — percentage or flat discounts, redeemed at checkout
@@ -77,6 +78,8 @@ applied in filename order:
 | `20261002000003_onboarding_trial` | Atomic `create_restaurant`, automatic 14-day trial, XAF plan prices |
 | `20261002000004_french_display_names` | French template names and default branch name |
 | `20261002000005_table_waiters` | Waiter assigned to each table, kept consistent when staff change |
+| `20261002000006_order_cancellation` | `cancel_order`: reason, coupon use given back, bill re-totalled |
+| `20261002000007_guest_rate_limit` | Per-table and per-device limits on guest orders and waiter calls |
 
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.
@@ -242,8 +245,13 @@ checkout rather than silently giving no discount.
 **Subscription & trial** (`src/lib/subscription.ts`): every restaurant
 starts on a 14-day Business trial; the dashboard shows the days left. When it
 ends, Business features (premium templates) are locked. Billing itself is not
-automated yet: a platform admin moves a restaurant to a paid plan. Plan
-prices follow the PRD §47 XAF hypothesis (5,000 / 10,000 / 20,000 XAF).
+automated yet: once the restaurant has paid, a platform admin activates or
+renews a plan for 1–12 months in `/admin/subscriptions` (an early renewal
+extends from the current end date), extends a trial by 14 days, marks a
+payment late or cancels. A paid plan keeps working for 7 days after its
+period ends — the dashboard asks the owner to renew — then falls back to
+Starter. Plan prices follow the PRD §47 XAF hypothesis (5,000 / 10,000 /
+20,000 XAF).
 
 **Order lifecycle** is closed end to end: kitchen drives pending → accepted →
 preparing → ready, the waiter's "À servir" queue takes ready → served, and the
@@ -252,6 +260,18 @@ closes the guest's bill request and sets the table "À débarrasser"; the
 waiter's "Table débarrassée" button makes it "Libre" again (unless new guests
 have already scanned it). Each order transition writes to
 `order_status_history`.
+
+**Cancellation** (`cancel_order`): the guest can cancel from the tracking
+page while the order is still pending; the kitchen (e.g. a dish sold out) and
+the owner can cancel any order not yet served, with a reason the guest sees.
+In one transaction the coupon use is given back, the open bill is re-totalled
+and the table stops showing a pending order.
+
+**Guest rate limits** (`begin_guest_action`): guests don't sign in, so a
+leaked QR link could flood the kitchen. Orders are limited to 6 per table and
+10 per device (IP) per 10 minutes, waiter calls to 10 and 15; the same open
+request can't be sent twice, and an order that fails (sold out, bad code)
+isn't counted. Ordering always needs the table's QR link.
 
 **Tables & waiters** (`/dashboard/tables`, `src/lib/waiter-floor.ts`): the
 owner gives each table a waiter. A waiter's screen shows their tables first;
@@ -270,7 +290,9 @@ count in the tab title for anything new, once alerts are switched on by a tap
 background tab; alerts with the phone locked are left to the planned native
 app.
 
-**Payment** (Congo-first): cash, Mobile Money and card, with manual confirmation in the current release. Automated Mobile Money collection is intentionally provider-agnostic and can be added when a supported local provider/aggregator is connected.
+**Payment**: cash only for now — the cashier records the payment with
+"Encaisser en espèces". `mark_bill_paid` already accepts Mobile Money and card,
+to be offered again once a local provider/aggregator is connected.
 
 **Near-real-time, not websocket Realtime**: customers and PIN-authenticated
 staff never hold a Supabase Auth session, so a browser-side Supabase Realtime

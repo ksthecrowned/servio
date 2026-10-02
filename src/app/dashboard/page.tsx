@@ -89,6 +89,17 @@ export default async function DashboardOverviewPage() {
         </div>
       )}
 
+      {access.renewalDue && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          <p className="font-medium">Votre abonnement est à renouveler.</p>
+          <p className="text-muted-foreground">
+            {access.effectiveTier === "starter"
+              ? "Les fonctions de votre formule sont verrouillées jusqu’au renouvellement. Contactez Servio pour régler votre abonnement."
+              : "Votre formule reste active quelques jours, le temps de régler votre abonnement auprès de Servio."}
+          </p>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>

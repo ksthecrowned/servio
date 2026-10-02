@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 
 import { advanceOrderStatus } from "@/app/actions/staff-ops";
+import { CancelOrderControl } from "@/components/orders/cancel-order-control";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ export function KitchenOrderCard({
             {isPending ? "Mise à jour…" : actionLabel}
           </Button>
         ) : null}
+        <CancelOrderControl orderId={order.id} as="kitchen" />
       </CardContent>
     </Card>
   );

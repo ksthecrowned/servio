@@ -331,6 +331,48 @@ export type Database = {
           },
         ];
       };
+      guest_actions: {
+        Row: {
+          action: string;
+          created_at: string;
+          id: string;
+          ip: string;
+          restaurant_id: string;
+          table_id: string;
+        };
+        Insert: {
+          action: string;
+          created_at?: string;
+          id?: string;
+          ip: string;
+          restaurant_id: string;
+          table_id: string;
+        };
+        Update: {
+          action?: string;
+          created_at?: string;
+          id?: string;
+          ip?: string;
+          restaurant_id?: string;
+          table_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guest_actions_restaurant_id_fkey";
+            columns: ["restaurant_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "guest_actions_table_id_fkey";
+            columns: ["table_id"];
+            isOneToOne: false;
+            referencedRelation: "restaurant_tables";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       loyalty_points: {
         Row: {
           customer_id: string;
@@ -797,6 +839,7 @@ export type Database = {
       orders: {
         Row: {
           branch_id: string;
+          cancel_reason: string | null;
           coupon_id: string | null;
           created_at: string;
           customer_id: string | null;
@@ -815,6 +858,7 @@ export type Database = {
         };
         Insert: {
           branch_id: string;
+          cancel_reason?: string | null;
           coupon_id?: string | null;
           created_at?: string;
           customer_id?: string | null;
@@ -833,6 +877,7 @@ export type Database = {
         };
         Update: {
           branch_id?: string;
+          cancel_reason?: string | null;
           coupon_id?: string | null;
           created_at?: string;
           customer_id?: string | null;
@@ -1678,6 +1723,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      begin_guest_action: {
+        Args: { p_action: string; p_ip: string; p_table_id: string };
+        Returns: string;
+      };
       begin_staff_login_attempt: {
         Args: {
           p_ip: string;
@@ -1685,6 +1734,18 @@ export type Database = {
           p_role: Database["public"]["Enums"]["restaurant_role"];
         };
         Returns: string;
+      };
+      cancel_guest_action: { Args: { p_id: string }; Returns: undefined };
+      cancel_order: {
+        Args: {
+          p_only_pending?: boolean;
+          p_order_id: string;
+          p_reason?: string;
+          p_restaurant_id: string;
+          p_staff_id?: string;
+          p_user_id?: string;
+        };
+        Returns: undefined;
       };
       complete_staff_login_attempt: { Args: { p_attempt_id: string }; Returns: undefined };
       create_restaurant: {

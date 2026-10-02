@@ -41,11 +41,24 @@ export function SignupForm() {
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="fullName">Votre nom</Label>
-            <Input id="fullName" name="fullName" required autoComplete="name" />
+            <Input
+              id="fullName"
+              name="fullName"
+              required
+              autoComplete="name"
+              defaultValue={state.values?.fullName}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">E-mail</Label>
-            <Input id="email" name="email" type="email" required autoComplete="email" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              defaultValue={state.values?.email}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">Mot de passe (8 caractères minimum)</Label>

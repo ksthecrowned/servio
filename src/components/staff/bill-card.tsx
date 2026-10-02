@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Wallet } from "lucide-react";
+import { Banknote } from "lucide-react";
 
 import { markBillPaid } from "@/app/actions/staff-ops";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
 
 type Bill = {
@@ -15,14 +14,8 @@ type Bill = {
   tableLabel: string;
 };
 
-const METHODS = [
-  { value: "cash", label: "Espèces" },
-  { value: "mobile_money", label: "Mobile Money" },
-  { value: "card", label: "Carte" },
-] as const;
-
+/** Cash only for now: Mobile Money and card come back with a payment provider. */
 export function BillCard({ bill }: { bill: Bill }) {
-  const [method, setMethod] = useState<(typeof METHODS)[number]["value"]>("cash");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -34,33 +27,17 @@ export function BillCard({ bill }: { bill: Bill }) {
           <p className="text-xl font-semibold">{formatCurrency(bill.total_amount)}</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          {METHODS.map((m) => (
-            <button
-              key={m.value}
-              type="button"
-              onClick={() => setMethod(m.value)}
-              className={cn(
-                "rounded-md border px-2 py-2 text-sm font-medium transition-colors",
-                method === m.value ? "border-brand bg-brand text-brand-foreground" : "hover:bg-accent",
-              )}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-
         <Button
           disabled={isPending}
           onClick={() =>
             startTransition(async () => {
-              const result = await markBillPaid(bill.id, method);
+              const result = await markBillPaid(bill.id);
               setError(result.error);
             })
           }
         >
-          <Wallet className="size-4" />
-          {isPending ? "Enregistrement…" : `Encaisser · ${METHODS.find((m) => m.value === method)?.label}`}
+          <Banknote className="size-4" />
+          {isPending ? "Enregistrement…" : "Encaisser en espèces"}
         </Button>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </CardContent>
