@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 
 import {
   claimWaiterRequest,
+  markTableCleared,
   resolveWaiterRequest,
   transferWaiterRequest,
 } from "@/app/actions/staff-ops";
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ReadyOrderCard } from "@/components/staff/ready-order-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { isRequestLate, requestAge, requestDetail, requestTitle } from "@/lib/request-status";
-import type { FloorRequest, WaiterFloor } from "@/lib/waiter-floor";
+import type { FloorRequest, FloorTable, WaiterFloor } from "@/lib/waiter-floor";
 
 export type WaiterColleague = { id: string; name: string };
 
@@ -23,7 +24,7 @@ const TABLE_STATUS: Record<string, string> = {
   preparing: "En préparation",
   ready: "Prête",
   bill_requested: "Addition",
-  cleaning: "Nettoyage",
+  cleaning: "À débarrasser",
 };
 
 function tableLine(label: string) {
@@ -53,20 +54,7 @@ export function WaiterBoard({
         ) : null}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {floor.tables.map((table) => (
-            <Card key={table.id} className={table.mine ? "border-brand" : undefined}>
-              <CardContent className="flex flex-col gap-1 pt-5">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium">{tableLine(table.label)}</p>
-                  {table.openCount > 0 ? <Badge>{table.openCount}</Badge> : null}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {TABLE_STATUS[table.status] ?? table.status}
-                </p>
-                <p className={table.mine ? "text-xs font-medium text-brand" : "text-xs text-muted-foreground"}>
-                  {table.mine ? "Ma table" : (table.assigneeName ?? "Sans serveur attitré")}
-                </p>
-              </CardContent>
-            </Card>
+            <FloorTableCard key={table.id} table={table} />
           ))}
           {floor.tables.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune table sur cette salle.</p>
@@ -129,6 +117,47 @@ export function WaiterBoard({
         emphasize
       />
     </div>
+  );
+}
+
+function FloorTableCard({ table }: { table: FloorTable }) {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const toClear = table.status === "cleaning";
+
+  return (
+    <Card className={table.mine ? "border-brand" : undefined}>
+      <CardContent className="flex flex-col gap-1 pt-5">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-medium">{tableLine(table.label)}</p>
+          {table.openCount > 0 ? <Badge>{table.openCount}</Badge> : null}
+        </div>
+        <p className={toClear ? "text-xs font-medium text-destructive" : "text-xs text-muted-foreground"}>
+          {TABLE_STATUS[table.status] ?? table.status}
+        </p>
+        <p className={table.mine ? "text-xs font-medium text-brand" : "text-xs text-muted-foreground"}>
+          {table.mine ? "Ma table" : (table.assigneeName ?? "Sans serveur attitré")}
+        </p>
+        {toClear ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-2"
+            disabled={isPending}
+            onClick={() => {
+              setError(null);
+              startTransition(async () => {
+                const result = await markTableCleared(table.id);
+                setError(result.error);
+              });
+            }}
+          >
+            {isPending ? "Enregistrement…" : "Table débarrassée"}
+          </Button>
+        ) : null}
+        {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -86,6 +86,40 @@ export async function markOrderServed(orderId: string) {
   revalidatePath("/staff/waiter");
 }
 
+/**
+ * Waiter marks a paid table as cleared: "À débarrasser" → "Libre".
+ *
+ * Only a table that is still waiting to be cleared changes: if guests have
+ * scanned its QR in the meantime it is already "Occupée" and stays so.
+ */
+export async function markTableCleared(tableId: string): Promise<{ error: string | null }> {
+  const session = await requireStaffSession("waiter");
+  const admin = createAdminClient();
+
+  const { data: table } = await admin
+    .from("restaurant_tables")
+    .select("id, branch_id, branches!inner(restaurant_id)")
+    .eq("id", tableId)
+    .eq("branches.restaurant_id", session.restaurantId)
+    .maybeSingle();
+
+  if (!table || (session.branchId && table.branch_id !== session.branchId)) {
+    return { error: "Table introuvable." };
+  }
+
+  const { data: cleared, error } = await admin
+    .from("restaurant_tables")
+    .update({ status: "available" })
+    .eq("id", tableId)
+    .eq("status", "cleaning")
+    .select("id");
+
+  revalidatePath("/staff/waiter");
+  if (error) return { error: userFacingError(error, "Une erreur est survenue. Réessayez.") };
+  if (!cleared || cleared.length === 0) return { error: "Cette table n’est plus à débarrasser." };
+  return { error: null };
+}
+
 type OwnedRequest = {
   id: string;
   branch_id: string;

@@ -248,8 +248,10 @@ prices follow the PRD §47 XAF hypothesis (5,000 / 10,000 / 20,000 XAF).
 **Order lifecycle** is closed end to end: kitchen drives pending → accepted →
 preparing → ready, the waiter's "À servir" queue takes ready → served, and the
 cashier recording payment completes every open order on the table session,
-closes the guest's bill request and frees the table. Each transition writes
-to `order_status_history`.
+closes the guest's bill request and sets the table "À débarrasser"; the
+waiter's "Table débarrassée" button makes it "Libre" again (unless new guests
+have already scanned it). Each order transition writes to
+`order_status_history`.
 
 **Tables & waiters** (`/dashboard/tables`, `src/lib/waiter-floor.ts`): the
 owner gives each table a waiter. A waiter's screen shows their tables first;
