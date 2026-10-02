@@ -19,7 +19,8 @@ product spec: [`docs/PRD.md`](docs/PRD.md).
 - 🧾 **Cashier flow** — bill creation and Mobile Money payment recording
 - 🎨 **Templates & branding** — 11 menu templates, brand colour, custom fonts
 - 👥 **Role-based staff access** — waiter / kitchen / cashier PIN login
-- 🏷️ **Coupons & offers**, seeded subscription plans
+- 🏷️ **Offers & promo codes** — percentage or flat discounts, redeemed at checkout
+- 🎁 **14-day free trial** with Business-level features for every new restaurant
 - 🛡️ **Multi-tenant by design** — Postgres Row Level Security isolates every restaurant's data
 - 📊 **Owner dashboard** — orders, tables, menu, staff, analytics, QR codes
 - 🛠️ **Platform admin** — manage restaurants, users, subscriptions, payments
@@ -29,6 +30,7 @@ product spec: [`docs/PRD.md`](docs/PRD.md).
 - [Stack](#stack)
 - [Getting started](#getting-started)
 - [Database](#database)
+- [Testing](#testing)
 - [How auth works](#how-auth-works)
 - [Route map](#route-map)
 - [What's implemented vs. what's next](#whats-implemented-vs-whats-next)
@@ -55,14 +57,23 @@ bun run dev
 Migrations live in `supabase/migrations/` and are plain SQL (no CLI lock-in),
 applied in filename order:
 
-1. `..._extensions_and_enums.sql` — extensions and enum types
-2. `..._core_schema.sql` — every table (restaurants, branches, menu, orders,
-   staff, subscriptions, …)
-3. `..._rls_policies.sql` — Row Level Security: restaurant-level isolation
-4. `..._seed_reference_data.sql` — subscription plans and menu templates
-5. `..._coupon_usage_function.sql` — coupon counter (superseded by `place_order`, dropped later)
-6. `..._storage_buckets.sql` — image buckets + storage RLS (per-restaurant folders)
-7. `..._mobile_money_payment.sql` — local Mobile Money payment method
+| Migration | What it does |
+| --- | --- |
+| `20260814000001_extensions_and_enums` | Extensions and enum types |
+| `20260814000002_core_schema` | Every table (restaurants, branches, menu, orders, staff, subscriptions, …) |
+| `20260814000003_rls_policies` | Row Level Security: restaurant-level isolation |
+| `20260814000004_seed_reference_data` | Subscription plans and menu templates |
+| `20260814000005_coupon_usage_function` | Coupon counter (superseded, dropped in `20261002000001`) |
+| `20260815000001_storage_buckets` | Image buckets + storage RLS (per-restaurant folders) |
+| `20260815000002_upi_payment` | Deprecated, kept for history |
+| `20261001000000_mobile_money_payment` | Mobile Money payment method |
+| `20261001000001_waiter_request_lifecycle` | Waiter request claim/transfer; one active session per table |
+| `20261001000002`…`000005` | Security hardening: RLS helpers moved to a private schema, RPC privileges closed |
+| `20261001000006_data_consistency` | Cross-tenant foreign keys and money invariants |
+| `20261001000007_fix_data_consistency` | Allows a new session per table after payment; `ON DELETE SET NULL (column)` |
+| `20261002000001_transactional_orders` | `place_order` and `mark_bill_paid`, each a single transaction |
+| `20261002000002_staff_login_throttle` | Staff PIN sign-in throttling |
+| `20261002000003_onboarding_trial` | Atomic `create_restaurant`, automatic 14-day trial, XAF plan prices |
 
 Apply them with the Supabase CLI (`supabase db push`) or by running each file
 against your project's Postgres connection in order.
@@ -80,20 +91,35 @@ bun run db:types    # regenerates database.types.ts from that DB
 ```
 
 `supabase/tests/00_platform_stubs.sql` provides the minimal `auth`/`storage`
-objects and API roles a real Supabase project already has — never run it
-against a real project. CI (`.github/workflows/ci.yml`) runs lint,
-typecheck and build, plus the two commands above, and fails if the
-committed types are stale.
+objects, API roles and default privileges a real Supabase project already
+has — never run it against a real project.
 
 Required env vars (see `.env.example`):
 
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from your
   Supabase project's API settings.
-- `SUPABASE_SERVICE_ROLE_KEY` — server-only, used for staff PIN login and
-  platform-admin operations (never exposed to the browser).
+- `SUPABASE_SERVICE_ROLE_KEY` — server-only, used wherever no Supabase Auth
+  session exists (guests, PIN-authenticated staff) and for platform-admin
+  listing; never exposed to the browser. See [Security notes](#security-notes).
 - `STAFF_SESSION_SECRET` — random secret signing staff PIN-login cookies
   (`openssl rand -base64 32`).
 - `NEXT_PUBLIC_SITE_URL` — used to build QR code target URLs.
+
+## Testing
+
+```bash
+bun run lint
+bun run typecheck   # next typegen + tsc
+bun run test        # unit tests (bun test)
+bun run db:verify   # migrations + SQL tests, needs DATABASE_URL (see above)
+```
+
+The SQL tests in `supabase/tests/*.test.sql` cover the database functions
+end to end: order pricing and coupons, payment, PIN throttling, onboarding
+and the trial, plus tenant-consistency constraints. They run inside a
+rolled-back transaction, several of them as the `authenticated` role so RLS
+applies. CI (`.github/workflows/ci.yml`) runs all of the above on every pull
+request, and fails if `database.types.ts` is stale.
 
 ## How auth works
 
@@ -104,17 +130,24 @@ Two separate authentication paths, matching the PRD:
   rows to the restaurant(s) they belong to.
 - **Restaurant staff** (waiter/kitchen/cashier) sign in with a role + 4-digit
   PIN at `/staff` — not a Supabase Auth session. The PIN is verified
-  server-side against `staff.pin_hash` (scrypt), and a signed HttpOnly cookie
-  (`STAFF_SESSION_SECRET`) carries the session. Staff server actions use the
-  Supabase service-role client (bypassing RLS by design) after re-verifying
-  that cookie on every request — see `src/lib/staff-session.ts` and
-  `src/app/actions/staff-ops.ts`.
+  server-side against `staff.pin_hash` (scrypt); attempts are throttled
+  (5 failures per device per 15 min, 20 per role per hour). A signed HttpOnly
+  cookie (`STAFF_SESSION_SECRET`) carries the session for one 12-hour shift,
+  with the expiry inside the signed payload. On every request the staff row
+  is re-read, so deactivating someone (dashboard → Staff) or changing their
+  role signs them out at once. Staff pages and actions then use the
+  service-role client (bypassing RLS by design) — see
+  `src/lib/staff-session.ts` and `src/app/actions/staff-ops.ts`.
 - **Customers** never authenticate. The QR menu pages
   (`/menu/[restaurant]/[branch]/[table]`) read public menu data through
-  anon-role RLS policies; placing an order or requesting the waiter goes
-  through a server action using the service-role client (`src/app/actions/orders.ts`,
-  `src/app/actions/waiter-requests.ts`), since anon has no write access to
-  those tables by design.
+  anon-role RLS policies; placing an order, requesting the waiter or leaving
+  feedback goes through a server action using the service-role client
+  (`src/app/actions/orders.ts`, `waiter-requests.ts`, `feedback.ts`), since
+  anon has no write access to those tables by design.
+- **New owners** create their restaurant at `/onboarding` through the
+  `create_restaurant` database function, which runs as the signed-in user
+  (RLS applies) and creates the restaurant, owner membership and first branch
+  in one transaction; a trigger starts the 14-day trial.
 
 ## Route map
 
@@ -187,8 +220,23 @@ seeded templates (3 free, 8 premium) change only presentation — layout,
 typography, image shape — never menu data, per PRD §32. The owner's brand
 colour is applied by overriding the `--brand` CSS custom property for the menu
 subtree, so existing `bg-brand`/`text-brand` utilities follow automatically.
-Premium templates are gated: locked on Starter, open during trial (PRD §48
-gives trials Business-level features).
+Premium templates are gated, in the form and in the server action: locked on
+Starter or once the trial has ended, open during the trial (PRD §48 gives
+trials Business-level features).
+
+**Offers & promo codes** (`/dashboard/offers`): an offer is a percentage or
+flat XAF discount, with optional minimum order, cap and date range. Guests
+redeem it with a promo code created under the offer (optionally limited in
+uses); `place_order` checks dates, limits and minimums and counts the use in
+the same transaction as the order. Offer types without pricing rules yet
+(BOGO, combo, happy hour) cannot be created, and their codes are refused at
+checkout rather than silently giving no discount.
+
+**Subscription & trial** (`src/lib/subscription.ts`): every restaurant
+starts on a 14-day Business trial; the dashboard shows the days left. When it
+ends, Business features (premium templates) are locked. Billing itself is not
+automated yet: a platform admin moves a restaurant to a paid plan. Plan
+prices follow the PRD §47 XAF hypothesis (5,000 / 10,000 / 20,000 XAF).
 
 **Order lifecycle** is closed end to end: kitchen drives pending → accepted →
 preparing → ready, the waiter's "Ready to serve" queue takes ready → served,
@@ -212,10 +260,12 @@ Deliberately not built yet (see PRD §53–56 for the phased roadmap):
 
 - True websocket Realtime (see above — currently short-interval polling)
 - Push notifications / sound alerts
-- Offer rule builder UI (offers table + RLS + coupon redemption logic exist;
-  no create/edit form for the owner)
-- Customer feedback form (schema exists; no UI)
-- Editing/deleting existing menu items (create works; no edit form yet)
+- Self-serve billing: choosing and paying for a plan after the trial (an
+  admin changes the subscription for now)
+- Offer rules beyond percentage/flat: BOGO, combos, happy hours, weekday or
+  time-of-day windows, item/category restrictions (columns exist, unused)
+- Deleting menu items, and deleting a restaurant that already has orders
+  (order lines keep a restricting reference to the menu item)
 - Online payment gateway (automated Mobile Money collection is not yet connected; there's no
   automatic reconciliation — the cashier confirms receipt manually)
 - local invoicing, printer integration
@@ -243,6 +293,11 @@ Deliberately not built yet (see PRD §53–56 for the phased roadmap):
   restaurant) and the negative case (a stranger cannot self-assign ownership
   of someone else's restaurant).
 - `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS and is only ever used server-side,
-  for the two cases where no Supabase Auth session exists to check against
-  RLS in the first place: staff PIN login and platform-admin listing.
-# servio
+  where no Supabase Auth session exists to check against RLS: guest actions
+  (ordering, waiter requests, feedback, order tracking, opening a table
+  session), staff PIN sign-in and the staff pages/actions (after the session
+  checks above), and platform-admin user listing. Every such path scopes its
+  queries to the restaurant/branch explicitly.
+- The money-moving functions (`place_order`, `mark_bill_paid`) and the PIN
+  throttle are executable by the service role only; `create_restaurant` by
+  signed-in users only. The SQL tests assert these grants.
