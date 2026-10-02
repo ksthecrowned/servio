@@ -207,6 +207,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
       .from("table_sessions")
       .select("id")
       .eq("table_id", tableId)
+      .eq("branch_id", branch.id)
       .eq("status", "open")
       .maybeSingle();
 
@@ -215,7 +216,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     if (!tableSessionId) {
       const { data: newSession } = await admin
         .from("table_sessions")
-        .insert({ table_id: tableId })
+        .insert({ table_id: tableId, branch_id: branch.id })
         .select("id")
         .single();
       tableSessionId = newSession?.id ?? null;
@@ -258,10 +259,18 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   );
 
   if (itemsError) {
+    await admin.from("orders").delete().eq("id", order.id);
     return { error: itemsError.message };
   }
 
-  await admin.from("order_status_history").insert({ order_id: order.id, status: "pending" });
+  const { error: historyError } = await admin
+    .from("order_status_history")
+    .insert({ order_id: order.id, status: "pending" });
+
+  if (historyError) {
+    await admin.from("orders").delete().eq("id", order.id);
+    return { error: historyError.message };
+  }
 
   if (tableId) {
     await admin.from("restaurant_tables").update({ status: "order_pending" }).eq("id", tableId);
