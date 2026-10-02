@@ -27,12 +27,20 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { listTableOrders, type TableOrder } from "@/app/actions/orders";
 import { listTableRequests, requestWaiterAssistance, type TableRequest } from "@/app/actions/waiter-requests";
 import { requestDetail, requestPhase, requestTitle } from "@/lib/request-status";
 import type { MenuItemForCart } from "@/components/menu/add-to-cart-dialog";
+import {
+  CartScreen,
+  DishOrderPanel,
+  GuestCartBar,
+  isOrderInProgress,
+  TableOrders,
+} from "@/components/menu/guest-ordering";
 import { formatCurrency } from "@/lib/currency";
 
-type View = "home" | "menu" | "detail" | "call" | "water" | "bill" | "other" | "question" | "requests";
+type View = "home" | "menu" | "detail" | "cart" | "call" | "water" | "bill" | "other" | "question" | "requests";
 type Dish = MenuItemForCart & { categoryName: string };
 type Category = { id: string; name: string; menu_items: MenuItemForCart[] };
 
@@ -94,6 +102,8 @@ export function GuestExperience({
   restaurant,
   categories,
   tableLabel,
+  restaurantSlug,
+  branchSlug,
   branchId,
   tableId,
   sessionOpenedAt,
@@ -101,6 +111,8 @@ export function GuestExperience({
   restaurant: { name: string; description: string | null; cuisine_type: string | null };
   categories: Category[];
   tableLabel?: string | null;
+  restaurantSlug: string;
+  branchSlug: string;
   branchId: string;
   tableId: string;
   sessionOpenedAt: string;
@@ -108,6 +120,7 @@ export function GuestExperience({
   const [view, setView] = useState<View>("home");
   const [dish, setDish] = useState<Dish | null>(null);
   const [requests, setRequests] = useState<TableRequest[]>([]);
+  const [orders, setOrders] = useState<TableOrder[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const startedAt = clock(sessionOpenedAt);
 
@@ -128,6 +141,9 @@ export function GuestExperience({
       void listTableRequests(branchId, tableId).then((rows) => {
         if (!cancel) setRequests(rows);
       });
+      void listTableOrders(branchId, tableId).then((rows) => {
+        if (!cancel) setOrders(rows);
+      });
     };
     load();
     const timer = setInterval(load, 4000);
@@ -142,7 +158,8 @@ export function GuestExperience({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const activeCount = requests.filter((request) => !request.resolved_at).length;
+  const activeCount =
+    requests.filter((request) => !request.resolved_at).length + orders.filter(isOrderInProgress).length;
 
   async function send(type: string, title: string, note?: string) {
     if (requests.some((request) => !request.resolved_at && request.type === type && (request.note ?? "") === (note ?? ""))) {
@@ -204,9 +221,14 @@ export function GuestExperience({
       )}
       {view === "detail" && dish && (
         <DishDetail
+          key={dish.id}
           dish={dish}
           back={() => navigate("menu")}
           ask={() => navigate("question")}
+          added={() => {
+            setToast("Ajouté au panier");
+            navigate("menu");
+          }}
         />
       )}
       {view === "call" && (
@@ -249,7 +271,26 @@ export function GuestExperience({
           tableLabel={tableLabel}
         />
       )}
-      {view === "requests" && <RequestsScreen requests={requests} menu={() => navigate("menu")} tableLabel={tableLabel} />}
+      {view === "cart" && (
+        <CartScreen
+          restaurantSlug={restaurantSlug}
+          branchSlug={branchSlug}
+          tableId={tableId}
+          menu={() => navigate("menu")}
+        />
+      )}
+      {view === "requests" && (
+        <RequestsScreen
+          requests={requests}
+          orders={orders}
+          restaurantSlug={restaurantSlug}
+          branchSlug={branchSlug}
+          menu={() => navigate("menu")}
+          tableLabel={tableLabel}
+        />
+      )}
+
+      {["home", "menu", "requests"].includes(view) ? <GuestCartBar onOpen={() => navigate("cart")} /> : null}
 
       <nav className="bottom-nav" aria-label="Navigation principale">
         <button type="button" className={view === "home" ? "active" : ""} onClick={() => navigate("home")}>
@@ -277,7 +318,7 @@ export function GuestExperience({
             <Clock3 size={21} />
             {activeCount > 0 ? <b>{activeCount}</b> : null}
           </span>
-          <span>Demandes</span>
+          <span>Suivi</span>
         </button>
       </nav>
     </>
@@ -485,7 +526,17 @@ function MenuScreen({
   );
 }
 
-function DishDetail({ dish, back, ask }: { dish: Dish; back: () => void; ask: () => void }) {
+function DishDetail({
+  dish,
+  back,
+  ask,
+  added,
+}: {
+  dish: Dish;
+  back: () => void;
+  ask: () => void;
+  added: () => void;
+}) {
   return (
     <div className="dish-detail animate-in">
       <div className="detail-image">
@@ -505,8 +556,9 @@ function DishDetail({ dish, back, ask }: { dish: Dish; back: () => void; ask: ()
           </span>
         </div>
         {dish.description ? <p className="lead">{dish.description}</p> : null}
+        {dish.is_available ? <DishOrderPanel dish={dish} onAdded={added} /> : null}
         <div className="detail-actions">
-          <Btn onClick={ask}>
+          <Btn variant="secondary" onClick={ask}>
             <MessageCircleQuestion size={19} /> Poser une question au serveur
           </Btn>
           <Btn variant="ghost" onClick={back}>
@@ -751,10 +803,16 @@ function QuestionScreen({
 
 function RequestsScreen({
   requests,
+  orders,
+  restaurantSlug,
+  branchSlug,
   menu,
   tableLabel,
 }: {
   requests: TableRequest[];
+  orders: TableOrder[];
+  restaurantSlug: string;
+  branchSlug: string;
   menu: () => void;
   tableLabel?: string | null;
 }) {
@@ -762,10 +820,12 @@ function RequestsScreen({
     <div className="screen requests-screen animate-in">
       <div className="page-heading">
         <p className="eyebrow">SESSION{tableLine(tableLabel) ? ` · ${tableLine(tableLabel)?.toUpperCase()}` : ""}</p>
-        <h1>Mes demandes</h1>
-        <p>Suivez vos demandes pendant le repas.</p>
+        <h1>Mon suivi</h1>
+        <p>Suivez vos commandes et vos demandes pendant le repas.</p>
       </div>
+      <TableOrders orders={orders} restaurantSlug={restaurantSlug} branchSlug={branchSlug} />
       <div className="requests-list">
+        {requests.length > 0 && orders.length > 0 ? <h2 className="list-title">Mes demandes</h2> : null}
         {requests.length ? (
           requests.map((request) => {
             const title = requestTitle(request.type, request.note);
@@ -809,12 +869,12 @@ function RequestsScreen({
               </article>
             );
           })
-        ) : (
+        ) : orders.length === 0 ? (
           <div className="empty-state">
-            <h3>Aucune demande</h3>
-            <p>Vos demandes de service apparaîtront ici.</p>
+            <h3>Rien pour l’instant</h3>
+            <p>Vos commandes et demandes de service apparaîtront ici.</p>
           </div>
-        )}
+        ) : null}
       </div>
       <Btn variant="secondary" onClick={menu}>
         <MenuIcon size={19} /> Voir le menu

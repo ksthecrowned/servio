@@ -1065,3 +1065,265 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+/* ---------------------------------------------------------------------------
+   Ordering: dish options, cart bar, cart screen, table orders
+   --------------------------------------------------------------------------- */
+
+.guest-app .order-panel {
+  margin-top: 8px;
+}
+
+.guest-app .order-panel .choice-list {
+  margin: 10px 0 0;
+}
+
+.guest-app .choice-list button small {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.guest-app .radio.square {
+  border-radius: 5px;
+}
+
+.guest-app .field-label textarea.compact {
+  min-height: 72px;
+  font-weight: 400;
+}
+
+.guest-app .add-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.guest-app .qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+}
+
+.guest-app .qty-stepper button {
+  width: 44px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+}
+
+.guest-app .qty-stepper button:disabled {
+  opacity: 0.35;
+}
+
+.guest-app .qty-stepper span {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 750;
+}
+
+.guest-app .cart-line-actions .qty-stepper {
+  height: 38px;
+}
+
+.guest-app .cart-line-actions .qty-stepper button {
+  width: 36px;
+}
+
+.guest-app .cart-bar-spacer {
+  height: 72px;
+}
+
+.guest-app .cart-bar {
+  position: fixed;
+  z-index: 39;
+  left: 50%;
+  bottom: calc(76px + 10px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 36px), 684px);
+  min-height: 56px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 750;
+  box-shadow: 0 12px 30px -12px color-mix(in oklch, var(--primary) 70%, transparent);
+  animation: guest-fade-up 0.25s ease both;
+}
+
+.guest-app .cart-bar > span:nth-child(2) {
+  flex: 1;
+  text-align: left;
+}
+
+.guest-app .cart-count {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklch, var(--primary-foreground) 18%, transparent);
+  font-size: 13px;
+}
+
+.guest-app .cart-lines {
+  display: grid;
+  border-top: 1px solid var(--border);
+  margin: 18px 0 0;
+}
+
+.guest-app .cart-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.guest-app .cart-line-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.guest-app .cart-line-copy small,
+.guest-app .cart-line-copy em {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.guest-app .cart-line > b {
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.guest-app .cart-line-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guest-app .icon-button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+}
+
+.guest-app .cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 0 6px;
+  font-weight: 750;
+}
+
+.guest-app .cart-total strong {
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.guest-app .cart-note {
+  margin: 0 0 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.guest-app .cart-fields {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.guest-app .text-field {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.guest-app .text-field input {
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 400;
+  outline: 0;
+}
+
+.guest-app .text-field input:focus {
+  border-color: var(--primary);
+}
+
+.guest-app .form-error {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.guest-app .cart-screen .btn + .btn {
+  margin-top: 8px;
+}
+
+.guest-app .table-orders {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+}
+
+.guest-app .table-orders h2,
+.guest-app .list-title {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.guest-app .table-order {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 17px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.guest-app .table-order > span:first-child {
+  flex: 1;
+  display: grid;
+  gap: 3px;
+}
+
+.guest-app .table-order small {
+  color: var(--muted-foreground);
+}

@@ -23,6 +23,8 @@ export default async function TableMenuPage(
       restaurant={data.restaurant}
       categories={data.categories}
       tableLabel={table.label}
+      restaurantSlug={data.restaurant.slug}
+      branchSlug={data.branch.slug}
       branchId={data.branch.id}
       tableId={table.id}
       sessionOpenedAt={session?.openedAt ?? new Date().toISOString()}

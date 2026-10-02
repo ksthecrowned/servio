@@ -193,10 +193,12 @@ image uploads, menu templates and branding, the full customer ordering loop
 kitchen/waiter/cashier flow (including bill creation when a customer requests
 the check), and near-real-time updates throughout.
 
-**Customer ordering loop** (`src/lib/cart-types.ts`,
-`src/components/menu/cart-provider.tsx`, `src/app/actions/orders.ts`): the
-cart is client-side (localStorage, scoped per restaurant+branch+table) purely
-for UX. `placeOrder` hands the cart's IDs to the `place_order` database
+**Customer ordering loop** (`src/components/menu/guest-ordering.tsx`,
+`src/components/menu/cart-provider.tsx`, `src/app/actions/orders.ts`): on the
+table menu, a dish page lets guests pick a size, add-ons, quantity and
+instructions, a cart bar opens the cart, and the "Suivi" tab lists the
+table's orders with links to their tracking page. The cart is client-side
+(localStorage, scoped per restaurant+branch+table) purely for UX. `placeOrder` hands the cart's IDs to the `place_order` database
 function (`supabase/migrations/..._transactional_orders.sql`), which prices
 every line, validates and counts the coupon, and writes the order in a single
 transaction — so a tampered client request can't change what the restaurant

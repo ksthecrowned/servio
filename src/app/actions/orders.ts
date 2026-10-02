@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { userFacingError } from "@/lib/supabase/errors";
+import type { Enums } from "@/lib/supabase/types";
 
 export type PlaceOrderLine = {
   itemId: string;
@@ -59,4 +60,39 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   return { orderId: data.order_id, orderNumber: data.order_number };
+}
+
+export type TableOrder = {
+  id: string;
+  order_number: number;
+  status: Enums<"order_status">;
+  total_amount: number;
+  created_at: string;
+};
+
+/**
+ * Orders of the table's current session, so guests can get back to their
+ * order tracking from the table menu. Scoped to the active session: guests
+ * at the next sitting don't see the previous table's orders.
+ */
+export async function listTableOrders(branchId: string, tableId: string): Promise<TableOrder[]> {
+  const admin = createAdminClient();
+
+  const { data: session } = await admin
+    .from("table_sessions")
+    .select("id")
+    .eq("table_id", tableId)
+    .eq("branch_id", branchId)
+    .neq("status", "closed")
+    .maybeSingle();
+
+  if (!session) return [];
+
+  const { data } = await admin
+    .from("orders")
+    .select("id, order_number, status, total_amount, created_at")
+    .eq("table_session_id", session.id)
+    .order("created_at", { ascending: false });
+
+  return data ?? [];
 }
